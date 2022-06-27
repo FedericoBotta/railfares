@@ -1,9 +1,31 @@
 import pandas as pd
 import csv
 import re
+import string
 
-
+### EDIT THIS
 project_dir = '/Users/fb394/Documents/GitHub/railfares/'
+
+
+def get_nlc_codes():
+    
+    url_str = 'http://www.railwaycodes.org.uk/crs/crs'
+
+    list_of_letters = list(string.ascii_lowercase)
+
+    nlc_codes = pd.DataFrame(columns = ['Location', 'CRS', 'NLC', 'TIPLOC', 'STANME', 'STANOX'])
+
+    for i in list_of_letters:
+        
+        full_url = url_str + i + '.shtm'
+        
+        html_tab = pd.read_html(full_url)
+        df = html_tab[1]
+        df.columns = html_tab[0].columns.values
+        nlc_codes = pd.concat([nlc_codes, df])
+        
+    return nlc_codes
+
 
 
 def get_station_clusters():
@@ -144,8 +166,48 @@ def get_location_records(location_type):
 
 
 
-
-
+def get_flow_records(flow_type):
+    
+    with open(project_dir + 'RJFAF214/RJFAF214.FFL', newline = '') as f:
+        reader = csv.reader(f)
+        for row in reader:
+    
+            if "Records" in row[0]:
+                number_rows = int(re.findall(r'\d+', row[0])[0])
+                break
+    
+    flow_df = pd.read_csv(project_dir + 'RJFAF214/RJFAF214.FFL', skiprows = 6, nrows = number_rows, names = ['col'])
+    
+    if flow_type == 'flow':
+        
+        flow_record = flow_df[flow_df['col'].apply(lambda x: (len(x) == 49) and (x[1] == 'F'))]
+        
+        return pd.DataFrame({'update-marker':flow_record['col'].str[0],
+                             'record_type':flow_record['col'].str[1],
+                             'origin_code':flow_record['col'].str[2:6],
+                             'destination_code':flow_record['col'].str[6:10],
+                             'route_code':flow_record['col'].str[10:15],
+                             'status_code':flow_record['col'].str[15:18],
+                             'usage_code':flow_record['col'].str[18],
+                             'direction':flow_record['col'].str[19],
+                             'end_date':flow_record['col'].str[20:28],
+                             'start_date':flow_record['col'].str[28:36],
+                             'toc':flow_record['col'].str[36:39],
+                             'cross_london_ind':flow_record['col'].str[39],
+                             'ns_disc_ind':flow_record['col'].str[40],
+                             'publication_ind':flow_record['col'].str[41],
+                             'flow_id':flow_record['col'].str[42:49]})
+        
+    if flow_type == 'fares':
+        
+        fare_record = flow_df[flow_df['col'].apply(lambda x: (len(x) == 22) and (x[1] == 'T'))]
+        
+        return pd.DataFrame({'update-marker':fare_record['col'].str[0],
+                             'record_type':fare_record['col'].str[1],
+                             'flow_id':fare_record['col'].str[2:9],
+                             'ticket_code':fare_record['col'].str[9:12],
+                             'fare':fare_record['col'].str[12:20],
+                             'restriction_code':fare_record['col'].str[20:22]})
 
 
 
