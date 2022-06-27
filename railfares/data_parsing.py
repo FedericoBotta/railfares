@@ -211,9 +211,49 @@ def get_flow_records(flow_type):
 
 
 
-
-
-
+def get_ticket_type_records():
+    
+    with open(project_dir + 'RJFAF214/RJFAF214.TTY', newline = '') as f:
+        reader = csv.reader(f)
+        for row in reader:
+    
+            if "Records" in row[0]:
+                number_rows = int(re.findall(r'\d+', row[0])[0])
+                break
+    
+    ticket_df = pd.read_csv(project_dir + 'RJFAF214/RJFAF214.TTY', skiprows = 6, nrows = number_rows, names = ['col'])
+    
+    return pd.DataFrame({'update_marker': ticket_df['col'].str[0],
+                         'ticket_code': ticket_df['col'].str[1:4],
+                         'end_date': ticket_df['col'].str[4:12],
+                         'start_date': ticket_df['col'].str[12:20],
+                         'quote_date': ticket_df['col'].str[20:28],
+                         'description': ticket_df['col'].str[28:43],
+                         'tkt_class': ticket_df['col'].str[43],
+                         'tkt_type': ticket_df['col'].str[44],
+                         'tkt_group': ticket_df['col'].str[45],
+                         'last_valid_day': ticket_df['col'].str[46:54],
+                         'max_passengers': ticket_df['col'].str[54:57],
+                         'min_passengers': ticket_df['col'].str[57:60],
+                         'max_adults': ticket_df['col'].str[60:63],
+                         'min_adults': ticket_df['col'].str[63:66],
+                         'max_children': ticket_df['col'].str[66:69],
+                         'min_children': ticket_df['col'].str[69:72],
+                         'restricted_by_date': ticket_df['col'].str[72],
+                         'restricted_by_train': ticket_df['col'].str[73],
+                         'restricted_by_area': ticket_df['col'].str[74],
+                         'validity_code': ticket_df['col'].str[75:77],
+                         'atb_description': ticket_df['col'].str[77:97],
+                         'lul_xlondon_issue': ticket_df['col'].str[97],
+                         'reservation_required': ticket_df['col'].str[98],
+                         'capri_code': ticket_df['col'].str[99:102],
+                         'lul_93': ticket_df['col'].str[102],
+                         'uts_code': ticket_df['col'].str[103:105],
+                         'time_restriction': ticket_df['col'].str[105],
+                         'free_pass_lul': ticket_df['col'].str[106],
+                         'package_mkr': ticket_df['col'].str[107],
+                         'fare_multiplier': ticket_df['col'].str[108:111],
+                         'discount_category': ticket_df['col'].str[111:113]})
 
 
 
