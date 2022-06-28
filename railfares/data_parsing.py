@@ -256,7 +256,33 @@ def get_ticket_type_records():
                          'discount_category': ticket_df['col'].str[111:113]})
 
 
-
+def get_ticket_validity():
+    
+    with open(project_dir + 'RJFAF214/RJFAF214.TVL', newline = '') as f:
+        reader = csv.reader(f)
+        for row in reader:
+    
+            if "Records" in row[0]:
+                number_rows = int(re.findall(r'\d+', row[0])[0])
+                break
+    
+    validity_df = pd.read_csv(project_dir + 'RJFAF214/RJFAF214.TVL', skiprows = 6, nrows = number_rows, names = ['col'])
+    
+    return pd.DataFrame({'validity_code': validity_df['col'].str[0:2],
+                         'end_date': validity_df['col'].str[2:10],
+                         'start_date': validity_df['col'].str[10:18],
+                         'description': validity_df['col'].str[18:38],
+                         'out_days': validity_df['col'].str[38:40],
+                         'out_months': validity_df['col'].str[40:42],
+                         'ret_days': validity_df['col'].str[42:44],
+                         'ret_months': validity_df['col'].str[44:46],
+                         'ret_after_days': validity_df['col'].str[46:48],
+                         'ret_after_months': validity_df['col'].str[48:50],
+                         'ret_after_day': validity_df['col'].str[50:52],
+                         'break_out': validity_df['col'].str[52],
+                         'break_rtn': validity_df['col'].str[53],
+                         'out_description': validity_df['col'].str[54:68],
+                         'rtn_description': validity_df['col'].str[68:82]})
 
 
 
