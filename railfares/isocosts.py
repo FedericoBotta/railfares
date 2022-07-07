@@ -1,24 +1,25 @@
-import data_parsing
+import railfares.data_parsing as data_parsing
+import pandas as pd
 
-tickets = data_parsing.get_ticket_type_records()
+project_dir = '/Users/fb394/Documents/GitHub/railfares/'
 
-validity = data_parsing.get_ticket_validity()
+starting_station = 'london paddington'
+
+tickets = data_parsing.get_ticket_type_records(project_dir)
+
+validity = data_parsing.get_ticket_validity(project_dir)
 
 val_code = validity[validity['out_days'] == '01']['validity_code'].to_list()
 
-#single_tickets = tickets[(tickets['end_date'] == '31122999') & (tickets['tkt_class'] == '2') & (tickets['tkt_type'] == 'S') & (tickets['validity_code'] == val_code)]
+single_tickets = pd.DataFrame([x for idx, x in tickets.iterrows() if x['end_date'] == '31122999' and x['tkt_class'] == '2' and x['tkt_type'] == 'S' and x['validity_code'] in val_code and 'anytime' in x['description'].lower()])
 
-single_tickets = pd.DataFrame([x for idx, x in tickets.iterrows() if x['end_date'] == '31122999' and x['tkt_class'] == '2' and x['tkt_type'] == 'S' and x['validity_code'] in val_code])
+exeter_nlc = data_parsing.get_station_code_from_name(starting_station, project_dir)['nlc_code']
 
-nlc_codes = data_parsing.get_nlc_codes()
+flow_df = data_parsing.get_flow_records('flow', project_dir)
 
-exeter_nlc = nlc_codes[nlc_codes['Location'] == 'Exeter St Davids']['NLC'].to_list()
+exeter_flows_df = flow_df[flow_df['origin_code'] == exeter_nlc[0]]
 
-flow_df = data_parsing.get_flow_records('flow')
-
-exeter_flows_df = flow_df[flow_df['origin_code'] == exeter_nlc[0][0:4]]
-
-fares_df = data_parsing.get_flow_records('fares')
+fares_df = data_parsing.get_flow_records('fares', project_dir)
 
 exeter_list = exeter_flows_df['flow_id'].to_list()
 
@@ -31,10 +32,18 @@ exeter_singles = exeter_fares_df[exeter_fares_df['ticket_code'].apply(lambda x: 
 exeter_singles['fare'] = exeter_singles['fare'].astype(int)/100
 
 
-budget = 3
 
-isocost = exeter_singles[exeter_singles['fare'].apply(lambda x: x < budget)]
+budget = 30
 
-isocost_route = exeter_flows_df[exeter_flows_df['flow_id'].apply(lambda x: x in isocost['flow_id'].to_list())]
+isocost = exeter_singles[exeter_singles['fare'].apply(lambda x: x <= budget)]
 
+isocost_route = exeter_flows_df[(exeter_flows_df['flow_id'].apply(lambda x: x in isocost['flow_id'].to_list()) & exeter_flows_df['end_date'].apply(lambda x: x == '31122999'))]
+
+isocost_destinations = data_parsing.get_station_name_from_code(isocost_route['destination_code'], project_dir)
+
+isocost_fare = isocost_route.merge(isocost[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left')
+
+destination_stations = isocost_destinations.merge(isocost_fare, left_on = 'nlc_code', right_on = 'destination_code')
+
+data_parsing.plot_isocost_stations(data_parsing.get_station_code_from_name(starting_station, project_dir)['crs_code'][0], destination_stations, project_dir + 'isocost.html', project_dir)
 
