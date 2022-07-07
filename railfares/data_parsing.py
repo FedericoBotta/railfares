@@ -1,14 +1,15 @@
 import pandas as pd
+import geopandas as gpd
 import csv
 import re
 import string
+# import contextily as cx
+import folium
 
-### EDIT THIS
-project_dir = '/Users/fb394/Documents/GitHub/railfares/'
 
-
+#POSSIBLY DEPRECATED
 def get_nlc_codes():
-    
+
     url_str = 'http://www.railwaycodes.org.uk/crs/crs'
 
     list_of_letters = list(string.ascii_lowercase)
@@ -28,7 +29,7 @@ def get_nlc_codes():
 
 
 
-def get_station_clusters():
+def get_station_clusters(project_dir):
     
     
     with open(project_dir + 'RJFAF214/RJFAF214.FSC', newline = '') as f:
@@ -48,7 +49,7 @@ def get_station_clusters():
                    'start_date': station_clusters['col'].str[17:25]})
 
 
-def get_location_records(location_type):
+def get_location_records(location_type, project_dir):
     
     with open(project_dir + 'RJFAF214/RJFAF214.LOC', newline = '') as f:
         reader = csv.reader(f)
@@ -166,7 +167,7 @@ def get_location_records(location_type):
 
 
 
-def get_flow_records(flow_type):
+def get_flow_records(flow_type, project_dir):
     
     with open(project_dir + 'RJFAF214/RJFAF214.FFL', newline = '') as f:
         reader = csv.reader(f)
@@ -211,7 +212,7 @@ def get_flow_records(flow_type):
 
 
 
-def get_ticket_type_records():
+def get_ticket_type_records(project_dir):
     
     with open(project_dir + 'RJFAF214/RJFAF214.TTY', newline = '') as f:
         reader = csv.reader(f)
@@ -256,7 +257,7 @@ def get_ticket_type_records():
                          'discount_category': ticket_df['col'].str[111:113]})
 
 
-def get_ticket_validity():
+def get_ticket_validity(project_dir):
     
     with open(project_dir + 'RJFAF214/RJFAF214.TVL', newline = '') as f:
         reader = csv.reader(f)
@@ -284,7 +285,94 @@ def get_ticket_validity():
                          'out_description': validity_df['col'].str[54:68],
                          'rtn_description': validity_df['col'].str[68:82]})
 
+def get_station_location(project_dir):
+    
+    
+    timetable = pd.read_csv(project_dir + 'ttis418/ttisf418.msn', skiprows = 1, names = ['col'])
+    
 
+    station_locations = timetable[timetable['col'].apply(lambda x: (len(x) == 82) and (x[0] == 'A'))]
+    
+    station_df = pd.DataFrame({'Station name':station_locations['col'].str[5:31].str.rstrip(), 
+                               'CRS Code': station_locations['col'].str[49:52],
+                               'Minor CRS code': station_locations['col'].str[43:46]})
+    
+    station_points = gpd.points_from_xy(station_locations['col'].str[53:57] + '00', station_locations['col'].str[59:63] + '00',  crs = 'OSGB36 / British National Grid')
+    
+    return gpd.GeoDataFrame(station_df, geometry = station_points)
+
+def get_station_code_from_name(station_name, project_dir):
+    
+    station_name = station_name.lower()
+    
+    station_gdf = get_station_location(project_dir)
+    
+    station_crs = station_gdf[station_gdf['Station name'].str.lower().str.contains(station_name)][['Station name', 'CRS Code', 'Minor CRS code']]
+    
+    loc_records_df = get_location_records('location record', project_dir)[['nlc_code', 'crs_code']]
+    
+    return station_crs.merge(loc_records_df, left_on = 'CRS Code', right_on = 'crs_code', how = 'left').drop_duplicates()
+
+def get_station_name_from_code(station_code, project_dir):
+    
+    if not isinstance(station_code, pd.Series):
+        
+        station_code = [station_code]
+    
+    station_gdf = get_station_location(project_dir)
+    
+    loc_records_df = get_location_records('location record', project_dir)[['nlc_code', 'crs_code']]
+    
+    station_nlc = loc_records_df[loc_records_df['nlc_code'].apply(lambda x: any([str(k) in x for k in station_code]))].drop_duplicates()
+    
+    return station_gdf.merge(station_nlc, left_on = 'CRS Code', right_on = 'crs_code', how = 'inner')
+
+
+def plot_isocost_stations(starting_station_code, destination_stations, out_path, project_dir):
+    
+    station_gdf = get_station_location(project_dir)
+    station_gdf = station_gdf.to_crs(epsg = 4326)
+    
+    starting_gdf = station_gdf[station_gdf['CRS Code'] == starting_station_code]
+    
+    destination_gdf = station_gdf[station_gdf['CRS Code'].isin(destination_stations['crs_code'])]
+    
+    # ax = starting_gdf.plot(figsize = (10,10), color = 'red')
+    # destination_gdf.plot(ax = ax, color = 'yellow')
+    # cx.add_basemap(ax = ax, crs = station_gdf.crs, zoom = 13, source = cx.providers.Stamen.TonerLite)
+    
+    
+    starting_gdf['label'] = 'starting'
+    starting_gdf['fare'] = 0
+    destination_gdf['label'] = 'destination'
+    destination_gdf = destination_gdf.merge(destination_stations[['crs_code', 'fare']], left_on = 'CRS Code', right_on = 'crs_code')
+    
+    stats_gdf = starting_gdf.append(destination_gdf).reset_index()
+    
+    geo_df_list = [[point.xy[1][0], point.xy[0][0]] for point in stats_gdf.geometry ]
+    cost_map = folium.Map(location = [stats_gdf.dissolve().centroid[0].coords[0][1],stats_gdf.dissolve().centroid[0].coords[0][0]], tiles = "Stamen Terrain", zoom_start = 10)
+    # Iterate through list and add a marker for each volcano, color-coded by its type.
+    i = 0
+    for coordinates in geo_df_list:
+       
+        if stats_gdf['label'][i] == 'starting':
+            
+            type_color = 'green'
+        
+        elif stats_gdf['label'][i] == 'destination':
+            
+            type_color = 'blue'
+
+
+        # Place the markers with the popup labels and data
+        cost_map.add_child(folium.Marker(location = coordinates,
+                                popup =
+                                "Station: " + str(stats_gdf['Station name'][i]) + '<br>' +
+                                "Fare: £" + str(stats_gdf['fare'][i]).ljust(4,'0'),
+                                icon = folium.Icon(color = "%s" % type_color)))
+        i = i + 1
+        
+    cost_map.save(out_path)
 
 
 
