@@ -48,6 +48,21 @@ def get_station_clusters(project_dir):
                    'end_date': station_clusters['col'].str[9:17],
                    'start_date': station_clusters['col'].str[17:25]})
 
+def get_cluster_from_nlc(nlc_code, project_dir, end_date = '31122999'):
+    
+    station_clusters = get_station_clusters(project_dir)
+    
+    return station_clusters[(station_clusters['cluster_nlc'] == nlc_code) & (station_clusters['end_date'] == end_date)].reset_index()
+
+def get_nlc_from_cluster(cluster_id, project_dir, end_date = '31122999'):
+    
+    station_clusters = get_station_clusters(project_dir)
+    
+    if not isinstance(cluster_id, pd.Series):
+        
+        cluster_id = [cluster_id]
+    
+    return station_clusters[(station_clusters['cluster_id'].isin(cluster_id)) & (station_clusters['end_date'] == end_date)].reset_index()
 
 def get_location_records(location_type, project_dir):
     
