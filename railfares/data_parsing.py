@@ -342,6 +342,90 @@ def get_station_name_from_code(station_code, project_dir):
     
     return station_gdf.merge(station_nlc, left_on = 'CRS Code', right_on = 'crs_code', how = 'inner')
 
+def get_isocost_from_list(station_flows_df, isocost, project_dir):
+    
+    temp_isocost_route = station_flows_df[(station_flows_df['flow_id'].isin(isocost['flow_id'].to_list())) & (station_flows_df['end_date'] == '31122999')]
+    temp_isocost_route['bool'] = [get_nlc_from_cluster(x, project_dir).empty for x in temp_isocost_route['destination_code']]
+    stations_route = temp_isocost_route[temp_isocost_route['bool'] == True]
+    clusters_route = temp_isocost_route[temp_isocost_route['bool'] == False]
+    unique_clusters = pd.Series(clusters_route['destination_code'].unique())
+    disagr_clusters = clusters_route.merge(get_nlc_from_cluster(pd.Series(unique_clusters),project_dir)[['cluster_id', 'cluster_nlc']], left_on = 'destination_code', right_on = 'cluster_id')
+    isocost_route = pd.concat([stations_route, disagr_clusters])
+    isocost_route['cluster_nlc'].fillna(isocost_route['destination_code'], inplace = True)
+    isocost_destinations = get_station_name_from_code(isocost_route['cluster_nlc'], project_dir)
+    isocost_fare = isocost_route.merge(isocost[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left')
+    return isocost_destinations.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
+    
+    
+
+def get_isocost_stations(starting_station, budget, project_dir):
+    
+    
+    tickets = get_ticket_type_records(project_dir)
+    
+    validity = get_ticket_validity(project_dir)
+    # val_code = validity[validity['out_days'] == '01']['validity_code'].to_list()
+    val_code = validity['validity_code'].to_list()
+    single_tickets = pd.DataFrame([x for idx, x in tickets.iterrows() if x['end_date'] == '31122999' and x['tkt_class'] == '2' and x['tkt_type'] == 'S' and x['validity_code'] in val_code and 'anytime' in x['description'].lower()])
+    
+    
+    station_nlc = get_station_code_from_name(starting_station, project_dir)['nlc_code']
+    stations_codes = get_cluster_from_nlc(station_nlc[0], project_dir)['cluster_id'].to_list()
+    stations_codes.append(station_nlc[0])
+    
+    
+    
+    flow_df = get_flow_records('flow', project_dir)
+    station_flows_df = flow_df[(flow_df['origin_code'].isin(stations_codes)) & (flow_df['end_date'] == '31122999')]
+    fares_df = get_flow_records('fares', project_dir)
+    station_list = station_flows_df['flow_id'].to_list()
+    station_fares_df = fares_df[fares_df['flow_id'].isin(station_list)]
+    # station_tickets = tickets[tickets['ticket_code'].isin(station_fares_df['ticket_code'].to_list())]
+    station_singles = station_fares_df[station_fares_df['ticket_code'].isin(single_tickets['ticket_code'].to_list())]
+    station_singles['fare'] = station_singles['fare'].astype(int)/100
+    
+    #look if flows/routes exist in reverse direction
+    inverse_station_flows_df = flow_df[(flow_df['destination_code'].isin(stations_codes)) & (flow_df['end_date'] == '31122999') & (flow_df['direction'] == 'R')]
+    inverse_station_list = inverse_station_flows_df['flow_id'].to_list()
+    inverse_station_fares_df = fares_df[fares_df['flow_id'].isin(inverse_station_list)]
+    # inverse_station_tickets = tickets[tickets['ticket_code'].isin(inverse_station_fares_df['ticket_code'].to_list())]
+    inverse_station_singles = inverse_station_fares_df[inverse_station_fares_df['ticket_code'].isin(single_tickets['ticket_code'].to_list())]
+    inverse_station_singles['fare'] = inverse_station_singles['fare'].astype(int)/100
+    
+    
+    isocost = station_singles[station_singles['fare'].apply(lambda x: x <= budget)]
+    # temp_isocost_route = station_flows_df[(station_flows_df['flow_id'].isin(isocost['flow_id'].to_list())) & (station_flows_df['end_date'] == '31122999')]
+    # temp_isocost_route['bool'] = [get_nlc_from_cluster(x, project_dir).empty for x in temp_isocost_route['destination_code']]
+    # stations_route = temp_isocost_route[temp_isocost_route['bool'] == True]
+    # clusters_route = temp_isocost_route[temp_isocost_route['bool'] == False]
+    # unique_clusters = pd.Series(clusters_route['destination_code'].unique())
+    # disagr_clusters = clusters_route.merge(get_nlc_from_cluster(pd.Series(unique_clusters),project_dir)[['cluster_id', 'cluster_nlc']], left_on = 'destination_code', right_on = 'cluster_id')
+    # isocost_route = pd.concat([stations_route, disagr_clusters])
+    # isocost_route['cluster_nlc'].fillna(isocost_route['destination_code'], inplace = True)
+    # isocost_destinations = get_station_name_from_code(isocost_route['cluster_nlc'], project_dir)
+    # isocost_fare = isocost_route.merge(isocost[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left')
+    #destination_stations = isocost_destinations.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
+    destination_stations = get_isocost_from_list(station_flows_df, isocost, project_dir)
+    
+    
+    #look at cost of routes in reverse direction
+    inverse_isocost = inverse_station_singles[inverse_station_singles['fare'].apply(lambda x: x <= budget)]
+    # temp_isocost_route = inverse_station_flows_df[(inverse_station_flows_df['flow_id'].isin(inverse_isocost['flow_id'].to_list())) & (inverse_station_flows_df['end_date'] == '31122999')]
+    # temp_isocost_route['bool'] = [get_nlc_from_cluster(x, project_dir).empty for x in temp_isocost_route['origin_code']]
+    # stations_route = temp_isocost_route[temp_isocost_route['bool'] == True]
+    # clusters_route = temp_isocost_route[temp_isocost_route['bool'] == False]
+    # unique_clusters = pd.Series(clusters_route['origin_code'].unique())
+    # disagr_clusters = clusters_route.merge(get_nlc_from_cluster(pd.Series(unique_clusters),project_dir)[['cluster_id', 'cluster_nlc']], left_on = 'origin_code', right_on = 'cluster_id')
+    # inverse_isocost_route = pd.concat([stations_route, disagr_clusters])
+    # inverse_isocost_route['cluster_nlc'].fillna(inverse_isocost_route['origin_code'], inplace = True)
+    # inverse_isocost_destinations = get_station_name_from_code(inverse_isocost_route['cluster_nlc'], project_dir)
+    # inverse_isocost_fare = inverse_isocost_route.merge(inverse_isocost[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left')
+    # inverse_destination_stations = inverse_isocost_destinations.merge(inverse_isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
+    inverse_destination_stations = get_isocost_from_list(inverse_station_flows_df, inverse_isocost, project_dir)
+    
+    
+    return pd.concat([destination_stations, inverse_destination_stations])
+    
 
 def plot_isocost_stations(starting_station_code, destination_stations, out_path, project_dir):
     
