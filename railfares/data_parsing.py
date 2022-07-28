@@ -342,16 +342,30 @@ def get_station_name_from_code(station_code, project_dir):
     
     return station_gdf.merge(station_nlc, left_on = 'CRS Code', right_on = 'crs_code', how = 'inner')
 
-def get_isocost_from_list(station_flows_df, isocost, project_dir):
+def get_isocost_from_list(station_flows_df, isocost, project_dir, inverse = False):
     
     temp_isocost_route = station_flows_df[(station_flows_df['flow_id'].isin(isocost['flow_id'].to_list())) & (station_flows_df['end_date'] == '31122999')]
-    temp_isocost_route['bool'] = [get_nlc_from_cluster(x, project_dir).empty for x in temp_isocost_route['destination_code']]
-    stations_route = temp_isocost_route[temp_isocost_route['bool'] == True]
-    clusters_route = temp_isocost_route[temp_isocost_route['bool'] == False]
-    unique_clusters = pd.Series(clusters_route['destination_code'].unique())
-    disagr_clusters = clusters_route.merge(get_nlc_from_cluster(pd.Series(unique_clusters),project_dir)[['cluster_id', 'cluster_nlc']], left_on = 'destination_code', right_on = 'cluster_id')
-    isocost_route = pd.concat([stations_route, disagr_clusters])
-    isocost_route['cluster_nlc'].fillna(isocost_route['destination_code'], inplace = True)
+    
+    if not inverse:
+        
+        temp_isocost_route['bool'] = [get_nlc_from_cluster(x, project_dir).empty for x in temp_isocost_route['destination_code']]
+        stations_route = temp_isocost_route[temp_isocost_route['bool'] == True]
+        clusters_route = temp_isocost_route[temp_isocost_route['bool'] == False]
+        unique_clusters = pd.Series(clusters_route['destination_code'].unique())
+        disagr_clusters = clusters_route.merge(get_nlc_from_cluster(pd.Series(unique_clusters),project_dir)[['cluster_id', 'cluster_nlc']], left_on = 'destination_code', right_on = 'cluster_id')
+        isocost_route = pd.concat([stations_route, disagr_clusters])
+        isocost_route['cluster_nlc'].fillna(isocost_route['destination_code'], inplace = True)
+    
+    elif inverse:
+        
+        temp_isocost_route['bool'] = [get_nlc_from_cluster(x, project_dir).empty for x in temp_isocost_route['destination_code']]
+        stations_route = temp_isocost_route[temp_isocost_route['bool'] == True]
+        clusters_route = temp_isocost_route[temp_isocost_route['bool'] == False]
+        unique_clusters = pd.Series(clusters_route['origin_code'].unique())
+        disagr_clusters = clusters_route.merge(get_nlc_from_cluster(pd.Series(unique_clusters),project_dir)[['cluster_id', 'cluster_nlc']], left_on = 'origin_code', right_on = 'cluster_id')
+        isocost_route = pd.concat([stations_route, disagr_clusters])
+        isocost_route['cluster_nlc'].fillna(isocost_route['origin_code'], inplace = True)
+        
     isocost_destinations = get_station_name_from_code(isocost_route['cluster_nlc'], project_dir)
     isocost_fare = isocost_route.merge(isocost[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left')
     return isocost_destinations.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
@@ -421,7 +435,7 @@ def get_isocost_stations(starting_station, budget, project_dir):
     # inverse_isocost_destinations = get_station_name_from_code(inverse_isocost_route['cluster_nlc'], project_dir)
     # inverse_isocost_fare = inverse_isocost_route.merge(inverse_isocost[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left')
     # inverse_destination_stations = inverse_isocost_destinations.merge(inverse_isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
-    inverse_destination_stations = get_isocost_from_list(inverse_station_flows_df, inverse_isocost, project_dir)
+    inverse_destination_stations = get_isocost_from_list(inverse_station_flows_df, inverse_isocost, project_dir, inverse = True)
     
     
     return pd.concat([destination_stations, inverse_destination_stations])
@@ -448,29 +462,40 @@ def plot_isocost_stations(starting_station_code, destination_stations, out_path,
     
     stats_gdf = starting_gdf.append(destination_gdf).reset_index()
     
-    geo_df_list = [[point.xy[1][0], point.xy[0][0]] for point in stats_gdf.geometry ]
+    
+
+    duplicate_stations = []
+    
+    
     cost_map = folium.Map(location = [stats_gdf.dissolve().centroid[0].coords[0][1],stats_gdf.dissolve().centroid[0].coords[0][0]], tiles = "Stamen Terrain", zoom_start = 10)
-    # Iterate through list and add a marker for each volcano, color-coded by its type.
-    i = 0
-    for coordinates in geo_df_list:
-       
-        if stats_gdf['label'][i] == 'starting':
-            
-            type_color = 'green'
+    for idx, row in stats_gdf.iterrows():
         
-        elif stats_gdf['label'][i] == 'destination':
+        if row['Station name'] not in duplicate_stations:
+            print(row['Station name'])
             
-            type_color = 'blue'
-
-
-        # Place the markers with the popup labels and data
-        cost_map.add_child(folium.Marker(location = coordinates,
+            duplicate_stations.append(row['Station name'])
+            
+            stats_df = stats_gdf[stats_gdf['Station name'] == row['Station name']]
+            
+            if row['label'] == 'starting':
+                
+                type_color = 'green'
+                
+            elif row['label'] == 'destination':
+                
+                type_color = 'blue'
+                
+            fares_str = ''
+            
+            for idx1, row1 in stats_df.iterrows():
+                
+                fares_str = fares_str + '<br>' + '£' + str(row1['fare']).ljust(4,'0')
+        
+        cost_map.add_child(folium.Marker(location = [row['geometry'].xy[1][0], row['geometry'].xy[0][0]],
                                 popup =
-                                "Station: " + str(stats_gdf['Station name'][i]) + '<br>' +
-                                "Fare: £" + str(stats_gdf['fare'][i]).ljust(4,'0'),
+                                "Station: " + str(row['Station name']) + '<br>' +
+                                "Fares: " + fares_str,
                                 icon = folium.Icon(color = "%s" % type_color)))
-        i = i + 1
-        
     cost_map.save(out_path)
 
 
