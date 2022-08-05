@@ -224,6 +224,32 @@ def get_flow_records(flow_type, project_dir):
                              'ticket_code':fare_record['col'].str[9:12],
                              'fare':fare_record['col'].str[12:20],
                              'restriction_code':fare_record['col'].str[20:22]})
+    
+    if flow_type == 'both':
+        
+        flow_record = flow_df[flow_df['col'].apply(lambda x: (len(x) == 49) and (x[1] == 'F'))]
+        fare_record = flow_df[flow_df['col'].apply(lambda x: (len(x) == 22) and (x[1] == 'T'))]
+        
+        return pd.DataFrame({'update-marker':flow_record['col'].str[0],
+                             'record_type':flow_record['col'].str[1],
+                             'origin_code':flow_record['col'].str[2:6],
+                             'destination_code':flow_record['col'].str[6:10],
+                             'route_code':flow_record['col'].str[10:15],
+                             'status_code':flow_record['col'].str[15:18],
+                             'usage_code':flow_record['col'].str[18],
+                             'direction':flow_record['col'].str[19],
+                             'end_date':flow_record['col'].str[20:28],
+                             'start_date':flow_record['col'].str[28:36],
+                             'toc':flow_record['col'].str[36:39],
+                             'cross_london_ind':flow_record['col'].str[39],
+                             'ns_disc_ind':flow_record['col'].str[40],
+                             'publication_ind':flow_record['col'].str[41],
+                             'flow_id':flow_record['col'].str[42:49]}),pd.DataFrame({'update-marker':fare_record['col'].str[0],
+                                                  'record_type':fare_record['col'].str[1],
+                                                  'flow_id':fare_record['col'].str[2:9],
+                                                  'ticket_code':fare_record['col'].str[9:12],
+                                                  'fare':fare_record['col'].str[12:20],
+                                                  'restriction_code':fare_record['col'].str[20:22]})
 
 
 
@@ -322,7 +348,7 @@ def get_station_code_from_name(station_name, project_dir):
     
     station_gdf = get_station_location(project_dir)
     
-    station_crs = station_gdf[station_gdf['Station name'].str.lower().str.contains(station_name)][['Station name', 'CRS Code', 'Minor CRS code']]
+    station_crs = station_gdf[station_gdf['Station name'].str.lower().str.contains(station_name, regex = False)][['Station name', 'CRS Code', 'Minor CRS code']]
     
     loc_records_df = get_location_records('location record', project_dir)[['nlc_code', 'crs_code']]
     
