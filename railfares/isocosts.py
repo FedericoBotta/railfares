@@ -1,13 +1,53 @@
 import railfares.data_parsing as data_parsing
 import pandas as pd
+import geopandas as gpd
+import alphashape
+import folium
 
 project_dir = '/Users/fb394/Documents/GitHub/railfares/'
 
-starting_station = 'newcastle'
+starting_station = 'exeter st davids'
 
-test = data_parsing.get_isocost_stations(starting_station, 15, project_dir)
+isocost_lines = gpd.GeoDataFrame()
 
-data_parsing.plot_isocost_stations(data_parsing.get_station_code_from_name(starting_station, project_dir)['crs_code'][0], gpd.GeoDataFrame(test), project_dir + 'new_test_isocost.html', project_dir)
+for b in range(5,25,5):
+    
+    
+    test = data_parsing.get_isocost_stations(starting_station, b, project_dir)
+    
+    # data_parsing.plot_isocost_stations(data_parsing.get_station_code_from_name(starting_station, project_dir)['crs_code'][0], test, project_dir + 'new_test_isocost.html', project_dir)
+    
+    
+    alpha_shape = alphashape.alphashape(test)
+    alpha_shape['max_cost'] = str(b)
+    isocost_lines = gpd.GeoDataFrame(pd.concat([isocost_lines, alpha_shape]), crs = alpha_shape.crs)
+
+
+
+
+color_dict = {'5': '#ffe6e6', '10': '#ffb3b3', '15': '#ff8080', '20': '#ff4d4d'}
+
+
+style1 = {'fillColor': '#228B22', 'color': '#228B22'}
+style2 = {'fillColor': '#00FFFFFF', 'color': '#00FFFFFF'}
+
+
+m = folium.Map([50.854457, 4.377184], zoom_start=5, tiles='cartodbpositron')
+folium.GeoJson(isocost_lines.to_json(), style_function = lambda feature: {'color': color_dict[feature['properties']['max_cost']]}).add_to(m)
+# folium.GeoJson(test).add_to(m)
+folium.LatLngPopup().add_to(m)
+m.save(project_dir + 'polygon.html')
+
+
+
+
+
+
+
+
+
+
+
 
 # tickets = data_parsing.get_ticket_type_records(project_dir)
 
