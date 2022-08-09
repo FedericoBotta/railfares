@@ -64,6 +64,15 @@ def get_nlc_from_cluster(cluster_id, project_dir, end_date = '31122999'):
     
     return station_clusters[(station_clusters['cluster_id'].isin(cluster_id)) & (station_clusters['end_date'] == end_date)].reset_index()
 
+def get_cluster_nlc_dict(project_dir,  end_date = '31122999'):
+    
+    station_clusters = get_station_clusters(project_dir)
+    
+    stations_clusters_active = station_clusters[station_clusters['end_date'] == end_date][['cluster_id', 'cluster_nlc']]
+    
+    return stations_clusters_active.groupby('cluster_id')['cluster_nlc'].apply(list).to_dict()
+
+
 def get_location_records(location_type, project_dir):
     
     with open(project_dir + 'RJFAF214/RJFAF214.LOC', newline = '') as f:
@@ -393,6 +402,48 @@ def get_isocost_from_list(station_flows_df, isocost, project_dir, inverse = Fals
         isocost_route['cluster_nlc'].fillna(isocost_route['origin_code'], inplace = True)
         
     isocost_destinations = get_station_name_from_code(isocost_route['cluster_nlc'], project_dir)
+    isocost_fare = isocost_route.merge(isocost[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left')
+    return isocost_destinations.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
+
+
+def get_isocost_from_list_fast(station_flows_df, isocost, station_gdf, loc_records_df, clusters_dict, project_dir, inverse = False):
+    
+    temp_isocost_route = station_flows_df[(station_flows_df['flow_id'].isin(isocost['flow_id'].to_list())) & (station_flows_df['end_date'] == '31122999')]
+    
+    # clusters_dict = get_cluster_nlc_dict(project_dir)
+    
+    if not inverse:
+        
+        temp_isocost_route['bool'] = [x in clusters_dict for x in temp_isocost_route['destination_code']]
+        stations_route = temp_isocost_route[temp_isocost_route['bool'] == False]
+        clusters_route = temp_isocost_route[temp_isocost_route['bool'] == True]
+        unique_clusters = pd.Series(clusters_route['destination_code'].unique())
+        disagr_clusters = clusters_route.merge(get_nlc_from_cluster(pd.Series(unique_clusters),project_dir)[['cluster_id', 'cluster_nlc']], left_on = 'destination_code', right_on = 'cluster_id')
+        isocost_route = pd.concat([stations_route, disagr_clusters])
+        isocost_route['cluster_nlc'].fillna(isocost_route['destination_code'], inplace = True)
+    
+    elif inverse:
+        
+        temp_isocost_route['bool'] = [x in clusters_dict  for x in temp_isocost_route['destination_code']]
+        stations_route = temp_isocost_route[temp_isocost_route['bool'] == False]
+        clusters_route = temp_isocost_route[temp_isocost_route['bool'] == True]
+        unique_clusters = pd.Series(clusters_route['origin_code'].unique())
+        disagr_clusters = clusters_route.merge(get_nlc_from_cluster(pd.Series(unique_clusters),project_dir)[['cluster_id', 'cluster_nlc']], left_on = 'origin_code', right_on = 'cluster_id')
+        isocost_route = pd.concat([stations_route, disagr_clusters])
+        isocost_route['cluster_nlc'].fillna(isocost_route['origin_code'], inplace = True)
+        
+    # isocost_destinations = get_station_name_from_code(isocost_route['cluster_nlc'], project_dir)
+    
+    station_code = isocost_route['cluster_nlc']
+    
+    if not isinstance(station_code, pd.Series):
+        
+        station_code = [station_code]
+    
+    station_nlc = loc_records_df[loc_records_df['nlc_code'].apply(lambda x: any([str(k) in x for k in station_code]))].drop_duplicates()
+    
+    isocost_destinations = station_gdf.merge(station_nlc, left_on = 'CRS Code', right_on = 'crs_code', how = 'inner')
+    
     isocost_fare = isocost_route.merge(isocost[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left')
     return isocost_destinations.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
     
