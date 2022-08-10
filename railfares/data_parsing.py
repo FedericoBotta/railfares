@@ -5,6 +5,7 @@ import re
 import string
 # import contextily as cx
 import folium
+import json
 
 
 #POSSIBLY DEPRECATED
@@ -73,6 +74,38 @@ def get_cluster_nlc_dict(project_dir,  end_date = '31122999'):
     return stations_clusters_active.groupby('cluster_id')['cluster_nlc'].apply(list).to_dict()
 
 
+def get_all_station_nlc_codes(project_dir, print_progress = False, outpath = None):
+    
+    station_gdf = get_station_location(project_dir)
+    loc_records_df = get_location_records('location record', project_dir)
+    station_gdf = station_gdf.merge(loc_records_df, left_on = 'CRS Code', right_on = 'crs_code', how = 'left').drop('crs_code',1).drop_duplicates().reset_index(drop = True)
+
+    flow_df = get_flow_records('flow', project_dir)
+    dest = loc_records_df[loc_records_df['nlc_code'].isin(flow_df['destination_code'].to_list())]['nlc_code'].unique()
+    orig = loc_records_df[loc_records_df['nlc_code'].isin(flow_df['origin_code'].to_list())]['nlc_code'].unique()
+    joint = list(orig) + list(set(dest) - set(orig))
+    all_stations_nlcs = loc_records_df[(loc_records_df['nlc_code'].isin(joint)) & (loc_records_df['end_date'] == '31122999')].reset_index()
+
+    stations_nlc_dict = {}
+
+    for idx, row in all_stations_nlcs.iterrows():
+        
+        stations_codes = get_cluster_from_nlc(row['nlc_code'], project_dir)['cluster_id'].to_list()
+        stations_codes.append(row['nlc_code'])
+        stations_nlc_dict[row['description'].rstrip()] = stations_codes
+        
+        if print_progress:
+            
+            print('Step ', idx, 'out of ', len(all_stations_nlcs))
+            
+    if outpath != None:
+        
+        with open(outpath + '.json', 'w') as fp:
+            json.dump(stations_nlc_dict, fp)
+    else:
+        
+        return stations_nlc_dict
+        
 def get_location_records(location_type, project_dir):
     
     with open(project_dir + 'RJFAF214/RJFAF214.LOC', newline = '') as f:
@@ -130,7 +163,7 @@ def get_location_records(location_type, project_dir):
                              'uts_north': location_record['col'].str[277:280],
                              'uts_east': location_record['col'].str[280:283],
                              'uts_south': location_record['col'].str[283:286],
-                             'uts_west': location_record['col'].str[286:289]})
+                             'uts_west': location_record['col'].str[286:289]}).reset_index()
     
     if location_type == 'associated stations':
         
@@ -141,7 +174,7 @@ def get_location_records(location_type, project_dir):
                              'uic_code': location_record['col'].str[2:9],
                              'end_date': location_record['col'].str[9:17],
                              'assoc_uic_code': location_record['col'].str[17:24],
-                             'assoc_crs_code': location_record['col'].str[24:27]})
+                             'assoc_crs_code': location_record['col'].str[24:27]}).reset_index()
     
     if location_type == 'railcard geography':
         
@@ -151,7 +184,7 @@ def get_location_records(location_type, project_dir):
                              'record_type': location_record['col'].str[1],
                              'uic_code': location_record['col'].str[2:9],
                              'railcard_code': location_record['col'].str[9:12],
-                             'end_date': location_record['col'].str[12:20]})
+                             'end_date': location_record['col'].str[12:20]}).reset_index()
     
     if location_type == 'tt group location':
         
@@ -165,7 +198,7 @@ def get_location_records(location_type, project_dir):
                              'quote_date': location_record['col'].str[25:33],
                              'description': location_record['col'].str[33:49],
                              'ers_country': location_record['col'].str[49:51],
-                             'ers_code': location_record['col'].str[51:54]})
+                             'ers_code': location_record['col'].str[51:54]}).reset_index()
     
     if location_type == 'group members':
         
@@ -176,7 +209,7 @@ def get_location_records(location_type, project_dir):
                              'group_uic_code': location_record['col'].str[2:9],
                              'end_date': location_record['col'].str[9:17],
                              'member_uic_code': location_record['col'].str[17:24],
-                             'members_crs_code': location_record['col'].str[24:27]})
+                             'members_crs_code': location_record['col'].str[24:27]}).reset_index()
     
     if location_type == 'synonym record':
         
@@ -187,7 +220,7 @@ def get_location_records(location_type, project_dir):
                              'uic_code': location_record['col'].str[2:9],
                              'end_date': location_record['col'].str[9:17],
                              'start_date': location_record['col'].str[17:25],
-                             'description': location_record['col'].str[25:41]})
+                             'description': location_record['col'].str[25:41]}).reset_index()
 
 
 
