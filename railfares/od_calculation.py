@@ -124,7 +124,15 @@ for key, value in stations_nlc_dict.items():
     isocost_destinations = station_gdf.merge(station_nlc, left_on = 'CRS Code', right_on = 'crs_code', how = 'inner')
     # merge back with fares data to get destination stations names and fares
     isocost_fare = isocost_route.merge(station_singles[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left')
-    destination_stations = isocost_destinations.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
+    
+    
+    
+    
+    
+    # destination_stations = isocost_destinations.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
+    destination_stations = station_nlc.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
+    
+    
     
     
     # repeat the same as above, but looking at existing reverse flows
@@ -161,25 +169,51 @@ for key, value in stations_nlc_dict.items():
     isocost_destinations = station_gdf.merge(station_nlc, left_on = 'CRS Code', right_on = 'crs_code', how = 'inner')
     
     isocost_fare = isocost_route.merge(inverse_station_singles[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left')
-    inverse_destination_stations = isocost_destinations.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
+    
+    
+    
+    
+    
+    # inverse_destination_stations = isocost_destinations.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
+    inverse_destination_stations = station_nlc.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
+    
+    
+    
+    
+    
+    
     inverse_destination_stations.rename(columns = {'origin_code': 'temp origin_code', 'destination_code': 'temp destination_code'}, inplace = True)
     
     inverse_destination_stations.rename(columns = {'temp origin_code': 'destination_code', 'temp destination_code': 'origin_code'}, inplace = True)
     
     if not destination_stations.empty and not inverse_destination_stations.empty:
         
-        od_df = pd.concat([destination_stations, inverse_destination_stations], ignore_index = True)[['Station name', 'geometry', 'nlc_code', 'origin_code','destination_code', 
+        # od_df = pd.concat([destination_stations, inverse_destination_stations], ignore_index = True)[['Station name', 'geometry', 'nlc_code', 'origin_code','destination_code', 
+        #                                                                                              'route_code', 'end_date', 'start_date', 'toc',
+        #                                                                                              'flow_id', 'cluster_id', 'fare']]
+        od_df = pd.concat([destination_stations, inverse_destination_stations], ignore_index = True)[['description', 'nlc_code', 'origin_code','destination_code', 
                                                                                                      'route_code', 'end_date', 'start_date', 'toc',
-                                                                                                     'flow_id', 'cluster_id', 'fare']]
+                                                                                                     'flow_id', 'cluster_id', 'fare']].copy()
     elif inverse_destination_stations.empty:
         
-        od_df = destination_stations
+        # od_df = destination_stations[['Station name', 'geometry', 'nlc_code', 'origin_code','destination_code', 
+        #                                                                                              'route_code', 'end_date', 'start_date', 'toc',
+        #                                                                                              'flow_id', 'cluster_id', 'fare']]
+        od_df = destination_stations[['description', 'nlc_code', 'origin_code','destination_code', 
+                                                                                                     'route_code', 'end_date', 'start_date', 'toc',
+                                                                                                     'flow_id', 'cluster_id', 'fare']].copy()
     
     elif destination_stations.empty:
         
-        od_df = inverse_destination_stations
+        # od_df = inverse_destination_stations[['Station name', 'geometry', 'nlc_code', 'origin_code','destination_code', 
+        #                                                                                              'route_code', 'end_date', 'start_date', 'toc',
+        #                                                                                              'flow_id', 'cluster_id', 'fare']]
+        od_df = inverse_destination_stations[['description', 'nlc_code', 'origin_code','destination_code', 
+                                                                                                     'route_code', 'end_date', 'start_date', 'toc',
+                                                                                                     'flow_id', 'cluster_id', 'fare']].copy()
         
-    od_df.rename(columns = {'Station name': 'Destination station name'}, inplace = True)
+    # od_df.rename(columns = {'Station name': 'Destination station name'}, inplace = True)
+    od_df.rename(columns = {'description': 'Destination station name'}, inplace = True)
     od_df ['Origin station name'] = key
     
     od_df_min = od_df.loc[od_df.groupby('Destination station name')['fare'].idxmin()]

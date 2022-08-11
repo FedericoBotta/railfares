@@ -133,7 +133,7 @@ def get_location_records(location_type, project_dir):
                              'description': location_record['col'].str[40:56],
                              'crs_code': location_record['col'].str[56:59],
                              'resv_code': location_record['col'].str[59:64],
-                             'ers_counry': location_record['col'].str[64:66],
+                             'ers_country': location_record['col'].str[64:66],
                              'ers_code': location_record['col'].str[66:69],
                              'fare_group': location_record['col'].str[69:75],
                              'county': location_record['col'].str[75:77:],
@@ -222,6 +222,26 @@ def get_location_records(location_type, project_dir):
                              'start_date': location_record['col'].str[17:25],
                              'description': location_record['col'].str[25:41]}).reset_index()
 
+
+def get_station_group_dictionary(project_dir, end_date = '31122999'):
+    
+    station_groups = get_location_records('group members', project_dir)
+    
+    stations_groups_active = station_groups[station_groups['end_date'] == end_date][['group_uic_code', 'member_uic_code', 'members_crs_code']]
+    
+    
+    
+    outdict = {} # create output dictionary
+
+    df = stations_groups_active.set_index('group_uic_code') # set index and group
+    df_grouped = df.groupby(df.index)
+
+    #iterate through groups populating the dictionary
+    for grp in df_grouped.groups:
+        g = df_grouped.get_group(grp)
+        outdict[grp] = g.to_dict('records')[0]
+    
+    return outdict
 
 
 def get_flow_records(flow_type, project_dir):
