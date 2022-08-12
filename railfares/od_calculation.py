@@ -1,7 +1,7 @@
 import railfares.data_parsing as data_parsing
 import pandas as pd
 import json
-
+import numpy as np
 
 project_dir = '/Users/fb394/Documents/GitHub/railfares/'
 
@@ -70,11 +70,16 @@ validity = data_parsing.get_ticket_validity(project_dir)
 # val_code = validity[validity['out_days'] == '01']['validity_code'].to_list()
 val_code = validity['validity_code'].to_list()
 single_tickets = pd.DataFrame([x for idx, x in tickets.iterrows() if x['end_date'] == '31122999' and x['tkt_class'] == '2' and x['tkt_type'] == 'S' and x['validity_code'] in val_code and 'anytime' in x['description'].lower()])
-loc_records_df = data_parsing.get_location_records('location record', project_dir)[['description', 'nlc_code', 'crs_code']]
+loc_records_df = data_parsing.get_location_records('location record', project_dir)[['description', 'nlc_code', 'crs_code', 'end_date']]
 station_gdf = data_parsing.get_station_location(project_dir)
 
 
 clusters_dict = data_parsing.get_cluster_nlc_dict(project_dir)
+
+station_group_dict = data_parsing.fares_group_to_uic_dict(project_dir)
+group_to_station_dict = data_parsing.get_station_group_dictionary(project_dir)
+uic_to_names = data_parsing.uic_to_station_name_dict(project_dir)
+group_name_to_station_name_dict = data_parsing.station_group_to_stations_names_dict(project_dir)
 
 od_list = pd.DataFrame()
 progr = 0
@@ -105,11 +110,12 @@ for key, value in stations_nlc_dict.items():
     # create data frame linking cluster ids to cluster nlc codes
     clust_nlc_df = pd.DataFrame([[k, clusters_dict.get(k)] for k in unique_clusters], columns = ['cluster_id', 'cluster_nlc']).explode('cluster_nlc')
     # split clusters into the various stations part of it
-    disagr_clusters = clusters_route.merge(clust_nlc_df, left_on = 'destination_code', right_on = 'cluster_id')
+    disagr_clusters = clusters_route.merge(clust_nlc_df, left_on = 'destination_code', right_on = 'cluster_id').copy()
     # put together routes to stations and routes to disaggregated cluster
     isocost_route = pd.concat([stations_route, disagr_clusters])
     # fill nas that are due to the merge above (stations not from a cluster do not have a cluster nlc, so need filling)
     isocost_route['cluster_nlc'].fillna(isocost_route['destination_code'], inplace = True)
+    
 
     # get nlc codes of destination stations
     station_code = isocost_route['cluster_nlc']
@@ -119,19 +125,22 @@ for key, value in stations_nlc_dict.items():
         station_code = [station_code]
     
     # find destination stations in location records
-    station_nlc = loc_records_df[loc_records_df['nlc_code'].isin(station_code)].drop_duplicates()
-    # and merge with station geodataframe to find their name
-    isocost_destinations = station_gdf.merge(station_nlc, left_on = 'CRS Code', right_on = 'crs_code', how = 'inner')
+    station_nlc = loc_records_df[(loc_records_df['nlc_code'].isin(station_code)) & (loc_records_df['end_date'] == '31122999')].drop_duplicates().drop('end_date', axis = 1).copy()
+    # and merge with station geodataframe to find their name (currently not needed)
+    # isocost_destinations = station_gdf.merge(station_nlc, left_on = 'CRS Code', right_on = 'crs_code', how = 'inner')
     # merge back with fares data to get destination stations names and fares
-    isocost_fare = isocost_route.merge(station_singles[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left')
-    
-    
-    
-    
+    isocost_fare = isocost_route.merge(station_singles[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left').drop_duplicates().copy()
     
     # destination_stations = isocost_destinations.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
-    destination_stations = station_nlc.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
+    destination_stations = station_nlc.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc').copy()
     
+    group_codes_indices = destination_stations.index[destination_stations['destination_code'].isin(station_group_dict.keys())]
+    group_codes_values = destination_stations[destination_stations['destination_code'].isin(station_group_dict.keys())]
+    
+    destination_stations = destination_stations.astype({'description': object})
+    
+    destination_stations.loc[group_codes_indices, 'description'] = np.array([group_name_to_station_name_dict[x['description'].rstrip()] for idx,x in group_codes_values.iterrows()], dtype = object)
+    destination_stations = destination_stations.explode('description')
     
     
     
@@ -164,21 +173,28 @@ for key, value in stations_nlc_dict.items():
         
         station_code = [station_code]
     
-    station_nlc = loc_records_df[loc_records_df['nlc_code'].isin(station_code)].drop_duplicates()
+    station_nlc = loc_records_df[(loc_records_df['nlc_code'].isin(station_code)) & (loc_records_df['end_date'] == '31122999')].drop_duplicates().drop('end_date', axis = 1).copy()
+    # currently not needed, so commented out
+    # isocost_destinations = station_gdf.merge(station_nlc, left_on = 'CRS Code', right_on = 'crs_code', how = 'inner')
     
-    isocost_destinations = station_gdf.merge(station_nlc, left_on = 'CRS Code', right_on = 'crs_code', how = 'inner')
-    
-    isocost_fare = isocost_route.merge(inverse_station_singles[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left')
+    isocost_fare = isocost_route.merge(inverse_station_singles[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left').drop_duplicates().copy()
     
     
     
     
     
     # inverse_destination_stations = isocost_destinations.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
-    inverse_destination_stations = station_nlc.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
+    inverse_destination_stations = station_nlc.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc').copy()
     
     
     
+    group_codes_indices = inverse_destination_stations.index[inverse_destination_stations['origin_code'].isin(station_group_dict.keys())]
+    group_codes_values = inverse_destination_stations[inverse_destination_stations['origin_code'].isin(station_group_dict.keys())]
+    
+    inverse_destination_stations = inverse_destination_stations.astype({'description': object})
+    
+    inverse_destination_stations.loc[group_codes_indices, 'description'] = np.array([group_name_to_station_name_dict[x['description'].rstrip()] for idx,x in group_codes_values.iterrows()], dtype = object)
+    inverse_destination_stations = inverse_destination_stations.explode('description')
     
     
     

@@ -76,10 +76,8 @@ def get_cluster_nlc_dict(project_dir,  end_date = '31122999'):
 
 def get_all_station_nlc_codes(project_dir, print_progress = False, outpath = None):
     
-    station_gdf = get_station_location(project_dir)
     loc_records_df = get_location_records('location record', project_dir)
-    station_gdf = station_gdf.merge(loc_records_df, left_on = 'CRS Code', right_on = 'crs_code', how = 'left').drop('crs_code',1).drop_duplicates().reset_index(drop = True)
-
+    
     flow_df = get_flow_records('flow', project_dir)
     dest = loc_records_df[loc_records_df['nlc_code'].isin(flow_df['destination_code'].to_list())]['nlc_code'].unique()
     orig = loc_records_df[loc_records_df['nlc_code'].isin(flow_df['origin_code'].to_list())]['nlc_code'].unique()
@@ -239,9 +237,64 @@ def get_station_group_dictionary(project_dir, end_date = '31122999'):
     #iterate through groups populating the dictionary
     for grp in df_grouped.groups:
         g = df_grouped.get_group(grp)
-        outdict[grp] = g.to_dict('records')[0]
+        outdict[grp] = g.to_dict('records')
     
     return outdict
+
+def fares_group_to_uic_dict(project_dir, end_date = '31122999'):
+    
+    group_members_dict = get_station_group_dictionary(project_dir, end_date = '31122999')
+    group_keys = group_members_dict.keys()
+    
+    loc_records_df = get_location_records('location record', project_dir)
+    
+    group_stations = loc_records_df[(loc_records_df['uic_code'].isin(group_keys)) & (loc_records_df['end_date'] == '31122999')].copy()
+    
+    group_stations['fare_group'] = group_stations['fare_group'].str.rstrip()
+    
+    return group_stations.set_index('fare_group').to_dict()['uic_code']
+    
+
+def uic_to_station_name_dict(project_dir, end_date = '31122999'):
+    
+    loc_records_df =  get_location_records('location record', project_dir)
+    
+    active_locs = loc_records_df[loc_records_df['end_date'] == end_date][['uic_code', 'description']].copy()
+    
+    active_locs['description'] = active_locs['description'].str.rstrip()
+    
+    return active_locs.set_index('uic_code').to_dict()['description']
+    
+
+def station_group_to_stations_names_dict(project_dir, end_date = '31122999'):
+    
+    uic_to_station_name = uic_to_station_name_dict(project_dir, end_date)
+    fares_group_to_uic = fares_group_to_uic_dict(project_dir, end_date)
+    station_group_dict = get_station_group_dictionary(project_dir, end_date)
+    
+    
+    loc_records_df = get_location_records('location record', project_dir)[['description', 'fare_group', 'end_date', 'uic_code']]
+    loc_records_df['fare_group'] = loc_records_df['fare_group'].str.rstrip()
+    loc_records_df['description'] = loc_records_df['description'].str.rstrip()
+    loc_records_df = loc_records_df[loc_records_df['end_date'] == end_date]
+    group_codes_values = loc_records_df[(loc_records_df['fare_group'].isin(fares_group_to_uic.keys())) & (loc_records_df['uic_code'].isin(fares_group_to_uic.values()))].drop(columns = 'end_date', axis = 1)
+    
+    group_nlc_to_name = group_codes_values.set_index('fare_group').to_dict()['description']
+    
+    
+    
+    group_to_names_dict = {}
+    
+    for key, value in fares_group_to_uic.items():
+        
+        stns = []
+        for value1 in station_group_dict[value]:
+            
+            stns.append(uic_to_station_name[value1['member_uic_code']])
+            
+        group_to_names_dict[group_nlc_to_name[key]] = stns
+        
+    return group_to_names_dict
 
 
 def get_flow_records(flow_type, project_dir):
