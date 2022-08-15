@@ -139,9 +139,11 @@ for key, value in stations_nlc_dict.items():
     
     destination_stations = destination_stations.astype({'description': object})
     
-    destination_stations.loc[group_codes_indices, 'description'] = np.array([group_name_to_station_name_dict[x['description'].rstrip()] for idx,x in group_codes_values.iterrows()], dtype = object)
-    destination_stations = destination_stations.explode('description')
-    
+    # destination_stations.loc[group_codes_indices, 'description'] = np.array([group_name_to_station_name_dict[x['description'].rstrip()] for idx,x in group_codes_values.iterrows()], dtype = object)
+    if not group_codes_indices.empty:
+        
+        destination_stations['description'] = destination_stations.apply(lambda x: group_name_to_station_name_dict[x['description'].rstrip()] if x.name in group_codes_indices else x['description'], axis = 1)
+        destination_stations = destination_stations.explode('description').explode('description')
     
     
     # repeat the same as above, but looking at existing reverse flows
@@ -193,8 +195,11 @@ for key, value in stations_nlc_dict.items():
     
     inverse_destination_stations = inverse_destination_stations.astype({'description': object})
     
-    inverse_destination_stations.loc[group_codes_indices, 'description'] = np.array([group_name_to_station_name_dict[x['description'].rstrip()] for idx,x in group_codes_values.iterrows()], dtype = object)
-    inverse_destination_stations = inverse_destination_stations.explode('description')
+    # inverse_destination_stations.loc[group_codes_indices, 'description'] = np.array([group_name_to_station_name_dict[x['description'].rstrip()] for idx,x in group_codes_values.iterrows()], dtype = object)
+    if not group_codes_indices.empty:
+        
+        inverse_destination_stations['description'] = inverse_destination_stations.apply(lambda x: group_name_to_station_name_dict[x['description'].rstrip()] if x.name in group_codes_indices else x['description'], axis = 1)
+        inverse_destination_stations = inverse_destination_stations.explode('description').explode('description')
     
     
     
