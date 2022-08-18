@@ -62,7 +62,8 @@ project_dir = '/Users/fb394/Documents/GitHub/railfares/'
 with open(project_dir + 'all_station_nlc_codes.json', 'r') as fp:
     stations_nlc_dict = json.load(fp)
 
-
+with open(project_dir + 'station_crs_dict.json', 'r') as fp:
+    stations_crs_dict = json.load(fp)
 
 flow_df, fares_df = data_parsing.get_flow_records('both', project_dir)
 tickets = data_parsing.get_ticket_type_records(project_dir)
@@ -70,7 +71,7 @@ validity = data_parsing.get_ticket_validity(project_dir)
 # val_code = validity[validity['out_days'] == '01']['validity_code'].to_list()
 val_code = validity['validity_code'].to_list()
 single_tickets = pd.DataFrame([x for idx, x in tickets.iterrows() if x['end_date'] == '31122999' and x['tkt_class'] == '2' and x['tkt_type'] == 'S' and x['validity_code'] in val_code and 'anytime' in x['description'].lower()])
-loc_records_df = data_parsing.get_location_records('location record', project_dir)[['description', 'nlc_code', 'crs_code', 'end_date']]
+loc_records_df = data_parsing.get_location_records('location record', project_dir)[['description', 'nlc_code', 'end_date']]
 station_gdf = data_parsing.get_station_location(project_dir)
 
 
@@ -83,6 +84,7 @@ group_name_to_station_name_dict = data_parsing.station_group_to_stations_names_d
 
 od_list = pd.DataFrame()
 progr = 0
+
 for key, value in stations_nlc_dict.items():
     
     # get the flows starting from the station and within valid date
@@ -134,8 +136,8 @@ for key, value in stations_nlc_dict.items():
     # destination_stations = isocost_destinations.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
     destination_stations = station_nlc.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc').copy()
     
-    group_codes_indices = destination_stations.index[destination_stations['destination_code'].isin(station_group_dict.keys())]
-    group_codes_values = destination_stations[destination_stations['destination_code'].isin(station_group_dict.keys())]
+    group_codes_indices = destination_stations.index[destination_stations['nlc_code'].isin(station_group_dict.keys())]
+    group_codes_values = destination_stations[destination_stations['nlc_code'].isin(station_group_dict.keys())]
     
     destination_stations = destination_stations.astype({'description': object})
     
@@ -190,8 +192,8 @@ for key, value in stations_nlc_dict.items():
     
     
     
-    group_codes_indices = inverse_destination_stations.index[inverse_destination_stations['origin_code'].isin(station_group_dict.keys())]
-    group_codes_values = inverse_destination_stations[inverse_destination_stations['origin_code'].isin(station_group_dict.keys())]
+    group_codes_indices = inverse_destination_stations.index[inverse_destination_stations['nlc_code'].isin(station_group_dict.keys())]
+    group_codes_values = inverse_destination_stations[inverse_destination_stations['nlc_code'].isin(station_group_dict.keys())]
     
     inverse_destination_stations = inverse_destination_stations.astype({'description': object})
     
@@ -235,9 +237,21 @@ for key, value in stations_nlc_dict.items():
         
     # od_df.rename(columns = {'Station name': 'Destination station name'}, inplace = True)
     od_df.rename(columns = {'description': 'Destination station name'}, inplace = True)
-    od_df ['Origin station name'] = key
+    
+    if not key in group_name_to_station_name_dict.keys():
+        
+        od_df['Origin station name'] = key
+        
+    else:
+        
+        od_df['Origin station name'] = ''
+        od_df['Origin station name'] = od_df.apply(lambda x: group_name_to_station_name_dict[key], axis = 1)
+        od_df = od_df.explode('Origin station name')
     
     od_df_min = od_df.loc[od_df.groupby('Destination station name')['fare'].idxmin()]
+    
+    od_df_min['origin_crs'] = [stations_crs_dict[row['Origin station name'].rstrip()] if row['Origin station name'] in stations_crs_dict.keys() else ' ' for idx, row in od_df_min.iterrows()]
+    od_df_min['destination_crs'] = [stations_crs_dict[row['Destination station name'].rstrip()] if row['Destination station name'].rstrip() in stations_crs_dict.keys() else ' ' for idx, row in od_df_min.iterrows()]
     
     if any(x in value for x in od_df_min['destination_code']):
         
@@ -249,6 +263,7 @@ for key, value in stations_nlc_dict.items():
     print('Station: ' ,key, ', index ', progr)
     progr = progr + 1
 
+# od_list_min = od_list.loc[od_list.groupby(['Destination station name', 'Origin station name'])['fare'].idxmin()]
 od_list.to_csv(project_dir + 'od_minimum_cost_matrix.csv')
 
 
