@@ -8,7 +8,7 @@ import folium
 import json
 
 
-#POSSIBLY DEPRECATED
+#DEPRECATED
 def get_nlc_codes():
 
     url_str = 'http://www.railwaycodes.org.uk/crs/crs'
@@ -31,6 +31,20 @@ def get_nlc_codes():
 
 
 def get_station_clusters(project_dir):
+    '''
+    Retrieves station clusters from ATOC data.
+
+    Parameters
+    ----------
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+
+    Returns
+    -------
+    Pandas dataframe
+        A data frame containing the station clusters data.
+
+    '''
     
     
     with open(project_dir + 'RJFAF214/RJFAF214.FSC', newline = '') as f:
@@ -50,12 +64,48 @@ def get_station_clusters(project_dir):
                    'start_date': station_clusters['col'].str[17:25]})
 
 def get_cluster_from_nlc(nlc_code, project_dir, end_date = '31122999'):
+    '''
+    Given a station NLC code, find all clusters that station is part of.
+
+    Parameters
+    ----------
+    nlc_code : STRING
+        The NLC code of a station. Note, this should not be an NLC code of a cluster.
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+    end_date : STRING, optional
+        The date until which the retrieved cluster is valid. The default is '31122999'.
+
+    Returns
+    -------
+    Pandas dataframe
+        A data frame containing all the clusters which contain the input station.
+
+    '''
     
     station_clusters = get_station_clusters(project_dir)
     
     return station_clusters[(station_clusters['cluster_nlc'] == nlc_code) & (station_clusters['end_date'] == end_date)].reset_index()
 
 def get_nlc_from_cluster(cluster_id, project_dir, end_date = '31122999'):
+    '''
+    Given a cluster NLC code, find all stations which are part of it.
+
+    Parameters
+    ----------
+    cluster_id : STRING
+        The NLC code identifying a cluster of stations.
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+    end_date : STRING, optional
+        The date until which the retrieved cluster is valid. The default is '31122999'.
+
+    Returns
+    -------
+    Pandas dataframe
+        A data frame containing all the stations contained in the input cluster.
+
+    '''
     
     station_clusters = get_station_clusters(project_dir)
     
@@ -66,6 +116,23 @@ def get_nlc_from_cluster(cluster_id, project_dir, end_date = '31122999'):
     return station_clusters[(station_clusters['cluster_id'].isin(cluster_id)) & (station_clusters['end_date'] == end_date)].reset_index()
 
 def get_cluster_nlc_dict(project_dir,  end_date = '31122999'):
+    '''
+    Create a dictionary of the station clusters to individual station correspondence.
+
+    Parameters
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+    end_date : STRING, optional
+        The date until which the retrieved cluster is valid. The default is '31122999'.
+
+    Returns
+    -------
+    DICT
+        A dictionary with cluster NLC codes as keys, and station NLC codes as values.
+        For each key (cluster NLC code), the values are a list of the stations (NLC codes)
+        contained in that cluster. 
+
+    '''
     
     station_clusters = get_station_clusters(project_dir)
     
@@ -75,6 +142,30 @@ def get_cluster_nlc_dict(project_dir,  end_date = '31122999'):
 
 
 def get_all_station_nlc_codes(project_dir, print_progress = False, outpath = None):
+    '''
+    Creates a dictionary of the station name to station NLC codes correspondence.
+    Note, there are multiple NLC codes associated to each station due to the
+    existence of station clusters.
+
+    Parameters
+    ----------
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+    print_progress : BOOLEAN, optional
+        Whether the function prints progress updates throughout. The default is False.
+    outpath : STRING, optional
+        A path where the file can be saved. The default is None.
+
+    Returns
+    -------
+    stations_nlc_dict : DICT
+        A dictionary containing all NLC codes, including those of clusters, associated
+        with an individual station. The keys are station names, and the values are
+        all corresponding NLC codes associated to that station. NOTE: if outpath
+        is different from None, the function does not return anything and saves
+        the dictionary to file instead.
+
+    '''
     
     loc_records_df = get_location_records('location record', project_dir)
     
@@ -103,6 +194,83 @@ def get_all_station_nlc_codes(project_dir, print_progress = False, outpath = Non
     else:
         
         return stations_nlc_dict
+
+def get_all_station_crs_codes(project_dir, print_progress = False, outpath = None, end_date = '31122999'):
+    '''
+    Creates a dictionary of the station name to station CRS code correspondence.
+    Note, not all stations have a station CRS code.
+
+    Parameters
+    ----------
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+    print_progress : BOOLEAN, optional
+        Whether the function prints progress updates throughout. The default is False.
+    outpath : STRING, optional
+        A path where the file can be saved. The default is None.
+    end_date : STRING, optional
+        A string representing the validity date until which a station is valid.
+        Stations whose end date is different from the input are discarded.
+        The default is '31122999'.
+
+    Returns
+    -------
+    stations_crs_dict : DICT
+        A dictionary containing the CRS code associated to each station (which has one).
+        The keys of the dictionary are the station names, the values the corresponding
+        CRS codes. NOTE: if outpath
+        is different from None, the function does not return anything and saves
+        the dictionary to file instead.
+
+    '''
+    
+    loc_records_df = get_location_records('location record', project_dir)
+    
+    flow_df = get_flow_records('flow', project_dir)
+    dest = loc_records_df[loc_records_df['nlc_code'].isin(flow_df['destination_code'].to_list())]['crs_code'].unique()
+    orig = loc_records_df[loc_records_df['nlc_code'].isin(flow_df['origin_code'].to_list())]['crs_code'].unique()
+    joint = list(orig) + list(set(dest) - set(orig))
+    all_stations_crs = loc_records_df[(loc_records_df['crs_code'].isin(joint)) & (loc_records_df['end_date'] == '31122999')].reset_index()
+    
+    group_name_to_station_name_dict = station_group_to_stations_names_dict(project_dir)
+    group_to_station_dict = get_station_group_dictionary(project_dir)
+    group_name_to_uic = group_name_to_group_uic(project_dir, end_date)
+    uic_to_names = uic_to_station_name_dict(project_dir)
+    
+    stations_crs_dict = {}
+
+    for idx, row in all_stations_crs.iterrows():
+        
+        if not row['crs_code'].isspace():
+            
+            stations_crs_dict[row['description'].rstrip()] = row['crs_code']
+        
+        elif (row['crs_code'].isspace()) and (row['description'].rstrip() in group_name_to_station_name_dict.keys()):
+            
+            stations_list = group_to_station_dict[group_name_to_uic[row['description'].rstrip()]]
+            
+            for x in stations_list:
+                
+                station_name = uic_to_names[x['member_uic_code']]
+                
+                if not station_name in stations_crs_dict.keys():
+                    
+                    stations_crs_dict[station_name] = x['members_crs_code']
+        else:
+            
+            stations_crs_dict[row['description'].rstrip()] = row['crs_code']
+            
+        if print_progress:
+            
+            print('Step ', idx, 'out of ', len(all_stations_crs))
+            
+    if outpath != None:
+        
+        with open(outpath + '.json', 'w') as fp:
+            json.dump(stations_crs_dict, fp)
+    else:
+        
+        return stations_crs_dict
         
 def get_location_records(location_type, project_dir):
     
@@ -253,7 +421,19 @@ def fares_group_to_uic_dict(project_dir, end_date = '31122999'):
     group_stations['fare_group'] = group_stations['fare_group'].str.rstrip()
     
     return group_stations.set_index('fare_group').to_dict()['uic_code']
+
+def group_name_to_group_uic(project_dir, end_date = '31122999'):
     
+    group_members_dict = get_station_group_dictionary(project_dir, end_date = '31122999')
+    group_keys = group_members_dict.keys()
+    
+    loc_records_df = get_location_records('location record', project_dir)
+    
+    group_stations = loc_records_df[(loc_records_df['uic_code'].isin(group_keys)) & (loc_records_df['end_date'] == '31122999')].copy()
+    
+    group_stations['description'] = group_stations['description'].str.rstrip()
+    
+    return group_stations.set_index('description').to_dict()['uic_code']
 
 def uic_to_station_name_dict(project_dir, end_date = '31122999'):
     
@@ -441,7 +621,7 @@ def get_ticket_validity(project_dir):
                          'out_description': validity_df['col'].str[54:68],
                          'rtn_description': validity_df['col'].str[68:82]})
 
-def get_station_location(project_dir):
+def get_station_location(project_dir, tiploc = False):
     
     
     timetable = pd.read_csv(project_dir + 'ttis418/ttisf418.msn', skiprows = 1, names = ['col'])
@@ -449,13 +629,37 @@ def get_station_location(project_dir):
 
     station_locations = timetable[timetable['col'].apply(lambda x: (len(x) == 82) and (x[0] == 'A'))]
     
-    station_df = pd.DataFrame({'Station name':station_locations['col'].str[5:31].str.rstrip(), 
-                               'CRS Code': station_locations['col'].str[49:52],
-                               'Minor CRS code': station_locations['col'].str[43:46]})
-    
+    if not tiploc:
+        
+        station_df = pd.DataFrame({'Station name':station_locations['col'].str[5:31].str.rstrip(), 
+                                   'CRS Code': station_locations['col'].str[49:52],
+                                   'Minor CRS code': station_locations['col'].str[43:46]})
+    elif tiploc:
+        
+        station_df = pd.DataFrame({'Station name':station_locations['col'].str[5:31].str.rstrip(), 
+                                   'tiploc_code': station_locations['col'].str[36:43],
+                                   'CRS Code': station_locations['col'].str[49:52],
+                                   'Minor CRS code': station_locations['col'].str[43:46]})
+        station_df['tiploc_code'] = station_df['tiploc_code'].str.rstrip()
+        
     station_points = gpd.points_from_xy(station_locations['col'].str[53:57] + '00', station_locations['col'].str[59:63] + '00',  crs = 'OSGB36 / British National Grid')
     
     return gpd.GeoDataFrame(station_df, geometry = station_points)
+
+def get_naptan_data(project_dir):
+    
+    naptan_data = pd.read_csv(project_dir + 'naptan_data.csv', low_memory = False)[['ATCOCode', 'CommonName', 'Easting', 'Northing', 'Longitude', 'Latitude', 'StopType']]
+    
+    naptan_rail = naptan_data[naptan_data['StopType'] == 'RLY'].copy()
+    
+    naptan_rail['TIPLOC'] = naptan_rail['ATCOCode'].apply(lambda x: x[4:])
+    
+    naptan_rail.drop(columns = ['ATCOCode', 'StopType'], axis = 1, inplace = True)
+    
+    points = gpd.points_from_xy(naptan_rail['Easting'], naptan_rail['Northing'], crs = 'OSGB36 / British National Grid')
+    
+    return gpd.GeoDataFrame(naptan_rail, geometry = points)
+    
 
 def get_station_code_from_name(station_name, project_dir):
     
