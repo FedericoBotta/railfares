@@ -6,6 +6,7 @@ import string
 # import contextily as cx
 import folium
 import json
+from warnings import warn
 
 
 #DEPRECATED
@@ -273,6 +274,22 @@ def get_all_station_crs_codes(project_dir, print_progress = False, outpath = Non
         return stations_crs_dict
         
 def get_location_records(location_type, project_dir):
+    '''
+    Parses the location records file of the ATOC fares data.
+
+    Parameters
+    ----------
+    location_type : STRING
+        The type of location records to be parsed.
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+        
+    Returns
+    -------
+    Pandas dataframe
+        A data frame containing the requested location records.
+
+    '''
     
     with open(project_dir + 'RJFAF214/RJFAF214.LOC', newline = '') as f:
         reader = csv.reader(f)
@@ -390,6 +407,30 @@ def get_location_records(location_type, project_dir):
 
 
 def get_station_group_dictionary(project_dir, end_date = '31122999'):
+    '''
+    Create a dictionary with the correspondence of station group UIC codes with
+    the station members UIC and CRS codes.
+
+    Parameters
+    ----------
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+    end_date : STRING, optional
+        A string representing the validity date until which a station group is valid.
+        Station groups whose end date is different from the input are discarded.
+        The default is '31122999'.
+
+    Returns
+    -------
+    outdict : DICT
+        A dictionary with the association of a station group UIC code with the
+        UIC and CRS codes of the group members. Keys are the station group UIC
+        codes, and the values are a nested dictionary for each station member of that
+        group. The nested dictionary contains the following keys: 'member_uic_code'
+        and 'members_crs_code', representing each station's UIC and CRS code respectively.'
+        Note that a station could in principle be part of multiple groups.
+
+    '''
     
     station_groups = get_location_records('group members', project_dir)
     
@@ -410,6 +451,27 @@ def get_station_group_dictionary(project_dir, end_date = '31122999'):
     return outdict
 
 def fares_group_to_uic_dict(project_dir, end_date = '31122999'):
+    '''
+    Create a dictionary with the association of the fare group NLC code and the
+    group UIC code.
+
+    Parameters
+    ----------
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+    end_date : STRING, optional
+        A string representing the validity date until which a station group is valid.
+        Station groups whose end date is different from the input are discarded.
+        The default is '31122999'.
+
+    Returns
+    -------
+    DICT
+        A dictionary to link fare group NLC codes to group UIC codes. Keys are
+        the fare group NLC codes, and values the corresponding UIC code for the
+        group.
+
+    '''
     
     group_members_dict = get_station_group_dictionary(project_dir, end_date = '31122999')
     group_keys = group_members_dict.keys()
@@ -423,6 +485,26 @@ def fares_group_to_uic_dict(project_dir, end_date = '31122999'):
     return group_stations.set_index('fare_group').to_dict()['uic_code']
 
 def group_name_to_group_uic(project_dir, end_date = '31122999'):
+    '''
+    Create a dictionary with the correspondence of station group names to station
+    group UIC codes.
+
+    Parameters
+    ----------
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+    end_date : STRING, optional
+        A string representing the validity date until which a station group is valid.
+        Station groups whose end date is different from the input are discarded.
+        The default is '31122999'.
+
+    Returns
+    -------
+    DICT
+        A dictionary linking station group names to station group UIC codes.
+        Keys are the station group names, and values the corresponding UIC codes.
+
+    '''
     
     group_members_dict = get_station_group_dictionary(project_dir, end_date = '31122999')
     group_keys = group_members_dict.keys()
@@ -436,6 +518,26 @@ def group_name_to_group_uic(project_dir, end_date = '31122999'):
     return group_stations.set_index('description').to_dict()['uic_code']
 
 def uic_to_station_name_dict(project_dir, end_date = '31122999'):
+    '''
+    Create a dictionary with the correspondence between station UIC code and
+    the station name.
+
+    Parameters
+    ----------
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+    end_date : STRING, optional
+        A string representing the validity date until which a station group is valid.
+        Station groups whose end date is different from the input are discarded.
+        The default is '31122999'.
+
+    Returns
+    -------
+    DICT
+        A dictionary linking station UIC code and its name. Keys are the UIC codes
+        and values are the station names.
+
+    '''
     
     loc_records_df =  get_location_records('location record', project_dir)
     
@@ -447,6 +549,28 @@ def uic_to_station_name_dict(project_dir, end_date = '31122999'):
     
 
 def station_group_to_stations_names_dict(project_dir, end_date = '31122999'):
+    '''
+    Create a dictionary with the correspondence between station group name and
+    the names of stations contained within that group.
+
+    Parameters
+    ----------
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+    end_date : STRING, optional
+        A string representing the validity date until which a station group is valid.
+        Station groups whose end date is different from the input are discarded.
+        The default is '31122999'.
+
+    Returns
+    -------
+    group_to_names_dict : DICT
+        A dictionary linking the station group name to the names of the stations
+        contained within that group. Keys are the station group names, values are
+        the names of the stations within that group. Note that in principle a station
+        can appear in multiple station groups..
+
+    '''
     
     uic_to_station_name = uic_to_station_name_dict(project_dir, end_date)
     fares_group_to_uic = fares_group_to_uic_dict(project_dir, end_date)
@@ -478,6 +602,23 @@ def station_group_to_stations_names_dict(project_dir, end_date = '31122999'):
 
 
 def get_flow_records(flow_type, project_dir):
+    '''
+    Parse the flow records of the ATOC fares data.
+
+    Parameters
+    ----------
+    flow_type : STRING
+        A string containing the type of record to be retrieved. Can be either
+        "flow" for the flows, or "fares" for the fares.
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+
+    Returns
+    -------
+    Pandas data frame
+        A data frame containing the requested flow or fares data.
+
+    '''
     
     with open(project_dir + 'RJFAF214/RJFAF214.FFL', newline = '') as f:
         reader = csv.reader(f)
@@ -549,6 +690,20 @@ def get_flow_records(flow_type, project_dir):
 
 
 def get_ticket_type_records(project_dir):
+    '''
+    Parse the ticket type records of the ATOC fares data.
+
+    Parameters
+    ----------
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+
+    Returns
+    -------
+    Pandas dataframe
+        A data frame containing the requested ticket type data.
+
+    '''
     
     with open(project_dir + 'RJFAF214/RJFAF214.TTY', newline = '') as f:
         reader = csv.reader(f)
@@ -594,6 +749,20 @@ def get_ticket_type_records(project_dir):
 
 
 def get_ticket_validity(project_dir):
+    '''
+    Parse the ticket validity records of the ATOC fares data.
+
+    Parameters
+    ----------
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+
+    Returns
+    -------
+    Pandas dataframe
+        A data frame containining the requested ticket validity data.
+
+    '''
     
     with open(project_dir + 'RJFAF214/RJFAF214.TVL', newline = '') as f:
         reader = csv.reader(f)
@@ -622,6 +791,24 @@ def get_ticket_validity(project_dir):
                          'rtn_description': validity_df['col'].str[68:82]})
 
 def get_station_location(project_dir, tiploc = False):
+    '''
+    Parse the station location records from the ATOC timetable data.
+
+    Parameters
+    ----------
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+    tiploc : BOOLEAN, optional
+        A boolean variable indicating whether the TIPLOC codes associated with 
+        each station should be returned. The default is False.
+
+    Returns
+    -------
+    Geopandas dataframe
+        A geo-data frame containing the requested location data. The geo-data
+        frame is in the following CRS: OSGB36 / British National Grid.
+
+    '''
     
     
     timetable = pd.read_csv(project_dir + 'ttis418/ttisf418.msn', skiprows = 1, names = ['col'])
@@ -647,6 +834,22 @@ def get_station_location(project_dir, tiploc = False):
     return gpd.GeoDataFrame(station_df, geometry = station_points)
 
 def get_naptan_data(project_dir):
+    '''
+    Parse the NAPTAN data containing the location of all stations. This is an
+    alternative to using the location data contained in the ATOC timetable files.
+
+    Parameters
+    ----------
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+
+    Returns
+    -------
+    Geopandas dataframe
+        A geo-data frame containing the station location data. The geo-data frame
+        is in the following CRS: OSGB36 / British National Grid.
+
+    '''
     
     naptan_data = pd.read_csv(project_dir + 'naptan_data.csv', low_memory = False)[['ATCOCode', 'CommonName', 'Easting', 'Northing', 'Longitude', 'Latitude', 'StopType']]
     
@@ -662,6 +865,24 @@ def get_naptan_data(project_dir):
     
 
 def get_station_code_from_name(station_name, project_dir):
+    '''
+    Retrieve station NLC and CRS codes from station name.
+
+    Parameters
+    ----------
+    station_name : STRING
+        The name of a train station.
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+
+    Returns
+    -------
+    Pandas data frame
+        A data frame containing the NLC and CRS codes for the input station name.
+        Note that if no match is found for the input station name, the function
+        returns an empty data frame.
+
+    '''
     
     station_name = station_name.lower()
     
@@ -674,7 +895,26 @@ def get_station_code_from_name(station_name, project_dir):
     return station_crs.merge(loc_records_df, left_on = 'CRS Code', right_on = 'crs_code', how = 'left').drop_duplicates()
 
 def get_station_name_from_code(station_code, project_dir):
-    
+    '''
+    Retrieve station name from station NLC code.
+
+    Parameters
+    ----------
+    station_code : STRING
+        A station NLC code. NOTE: this can also be a collection of strings
+        contained in a Pandas series.
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+
+    Returns
+    -------
+    Pandas dataframe
+        A data frame containing the association between station code and name.
+        If the input is a collection of strings, each row of the data frame
+        corresponds to one of the input station NLC codes.
+
+    '''
+    warn('This is deprecated', DeprecationWarning, stacklevel = 2)
     if not isinstance(station_code, pd.Series):
         
         station_code = [station_code]
@@ -688,6 +928,28 @@ def get_station_name_from_code(station_code, project_dir):
     return station_gdf.merge(station_nlc, left_on = 'CRS Code', right_on = 'crs_code', how = 'inner')
 
 def get_isocost_from_list(station_flows_df, isocost, project_dir, inverse = False):
+    '''
+    Associates fares to flows from a specific station.
+
+    Parameters
+    ----------
+    station_flows_df : Pandas dataframe
+        A data frame containing the flows corresponding to a specific starting station.
+    isocost : Pandas dataframe
+        A data frame containing the fares data for flows starting from a specific
+        station.
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+    inverse : BOOLEAN, optional
+        Whether we are looking at reverse flows. The default is False.
+
+    Returns
+    -------
+    Pandas dataframe
+        A data frame containing the flows and associated fares. Station clusters
+        are disaggregated in the component stations of the cluster.
+
+    '''
     
     temp_isocost_route = station_flows_df[(station_flows_df['flow_id'].isin(isocost['flow_id'].to_list())) & (station_flows_df['end_date'] == '31122999')]
     
@@ -717,6 +979,32 @@ def get_isocost_from_list(station_flows_df, isocost, project_dir, inverse = Fals
 
 
 def get_isocost_from_list_fast(station_flows_df, isocost, station_gdf, loc_records_df, clusters_dict, project_dir, inverse = False):
+    '''
+    Same as get_isocost_from_list but faster.
+
+    Parameters
+    ----------
+    station_flows_df : TYPE
+        DESCRIPTION.
+    isocost : TYPE
+        DESCRIPTION.
+    station_gdf : TYPE
+        DESCRIPTION.
+    loc_records_df : TYPE
+        DESCRIPTION.
+    clusters_dict : TYPE
+        DESCRIPTION.
+    project_dir : TYPE
+        DESCRIPTION.
+    inverse : TYPE, optional
+        DESCRIPTION. The default is False.
+
+    Returns
+    -------
+    TYPE
+        DESCRIPTION.
+
+    '''
     
     temp_isocost_route = station_flows_df[(station_flows_df['flow_id'].isin(isocost['flow_id'].to_list())) & (station_flows_df['end_date'] == '31122999')]
     
@@ -795,33 +1083,11 @@ def get_isocost_stations(starting_station, budget, project_dir):
     
     
     isocost = station_singles[station_singles['fare'].apply(lambda x: x <= budget)]
-    # temp_isocost_route = station_flows_df[(station_flows_df['flow_id'].isin(isocost['flow_id'].to_list())) & (station_flows_df['end_date'] == '31122999')]
-    # temp_isocost_route['bool'] = [get_nlc_from_cluster(x, project_dir).empty for x in temp_isocost_route['destination_code']]
-    # stations_route = temp_isocost_route[temp_isocost_route['bool'] == True]
-    # clusters_route = temp_isocost_route[temp_isocost_route['bool'] == False]
-    # unique_clusters = pd.Series(clusters_route['destination_code'].unique())
-    # disagr_clusters = clusters_route.merge(get_nlc_from_cluster(pd.Series(unique_clusters),project_dir)[['cluster_id', 'cluster_nlc']], left_on = 'destination_code', right_on = 'cluster_id')
-    # isocost_route = pd.concat([stations_route, disagr_clusters])
-    # isocost_route['cluster_nlc'].fillna(isocost_route['destination_code'], inplace = True)
-    # isocost_destinations = get_station_name_from_code(isocost_route['cluster_nlc'], project_dir)
-    # isocost_fare = isocost_route.merge(isocost[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left')
-    #destination_stations = isocost_destinations.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
     destination_stations = get_isocost_from_list(station_flows_df, isocost, project_dir)
     
     
     #look at cost of routes in reverse direction
     inverse_isocost = inverse_station_singles[inverse_station_singles['fare'].apply(lambda x: x <= budget)]
-    # temp_isocost_route = inverse_station_flows_df[(inverse_station_flows_df['flow_id'].isin(inverse_isocost['flow_id'].to_list())) & (inverse_station_flows_df['end_date'] == '31122999')]
-    # temp_isocost_route['bool'] = [get_nlc_from_cluster(x, project_dir).empty for x in temp_isocost_route['origin_code']]
-    # stations_route = temp_isocost_route[temp_isocost_route['bool'] == True]
-    # clusters_route = temp_isocost_route[temp_isocost_route['bool'] == False]
-    # unique_clusters = pd.Series(clusters_route['origin_code'].unique())
-    # disagr_clusters = clusters_route.merge(get_nlc_from_cluster(pd.Series(unique_clusters),project_dir)[['cluster_id', 'cluster_nlc']], left_on = 'origin_code', right_on = 'cluster_id')
-    # inverse_isocost_route = pd.concat([stations_route, disagr_clusters])
-    # inverse_isocost_route['cluster_nlc'].fillna(inverse_isocost_route['origin_code'], inplace = True)
-    # inverse_isocost_destinations = get_station_name_from_code(inverse_isocost_route['cluster_nlc'], project_dir)
-    # inverse_isocost_fare = inverse_isocost_route.merge(inverse_isocost[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left')
-    # inverse_destination_stations = inverse_isocost_destinations.merge(inverse_isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
     inverse_destination_stations = get_isocost_from_list(inverse_station_flows_df, inverse_isocost, project_dir, inverse = True)
     
     
@@ -836,11 +1102,6 @@ def plot_isocost_stations(starting_station_code, destination_stations, out_path,
     starting_gdf = station_gdf[station_gdf['CRS Code'] == starting_station_code]
     
     destination_gdf = station_gdf[station_gdf['CRS Code'].isin(destination_stations['crs_code'])]
-    
-    # ax = starting_gdf.plot(figsize = (10,10), color = 'red')
-    # destination_gdf.plot(ax = ax, color = 'yellow')
-    # cx.add_basemap(ax = ax, crs = station_gdf.crs, zoom = 13, source = cx.providers.Stamen.TonerLite)
-    
     
     starting_gdf['label'] = 'starting'
     starting_gdf['fare'] = 0
