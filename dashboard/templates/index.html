@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Flask Leaflet Website</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/universal.css') }}" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+  crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+  integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+  crossorigin=""></script>
+<script src="static/js/leaflet-providers.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+
+</head>
+
+<body>
+<div>
+
+
+<select id="dropdown" method="GET" action="/">
+    {% for stats in list_stations %}
+    <option value= "{{stats}}" SELECTED>{{stats}}</option>"
+    {% endfor %}
+</select>
+
+<p id="selected-dropdown"></p>
+<button id="station-button">Click me to get the data!</button>
+</div>
+<div id="map"></div>
+
+
+<script>
+
+var map = L.map('map').setView([52, 0], 7);
+L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZmVkZWJvdHRhIiwiYSI6ImNsNnZzZmx1bDA0aXozYnA5NHNxc2oxYm4ifQ.NH-kHQqlCLP3OVnx5ygJlQ', {
+attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+preferCanvas: true
+}).addTo(map); 
+
+
+var geojsonMarkerOptions = {
+    radius: 8,
+    color: "#000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8
+};
+
+function onEachFeature(feature, layer) {
+    if (feature.properties && feature.properties.popupText) {
+        layer.bindPopup(feature.properties.popupText);
+    }
+};
+
+d3.select('#station-button')
+    .on("click", function(){
+    var selected = d3.select("#dropdown").node().value;
+    d3.select("#selected-dropdown").text(selected);
+    
+            
+    jQuery.ajax({
+         url: "/PlotCost",
+         data: {"starting_station": selected},
+         type: 'POST',
+         success: function(data){
+         
+         console.log(jQuery.parseJSON(data.data));
+         
+         L.geoJSON( jQuery.parseJSON(data.data), {
+    pointToLayer: function (feature, latlng) {
+        return L.circleMarker(latlng, geojsonMarkerOptions)
+    }
+, style: function(feature){
+return {fillColor: feature.properties.marker_colour}},
+
+    onEachFeature: onEachFeature
+}).addTo(map);
+         
+        
+         }
+     })
+     
+    });
+</script>
+</body>
+
+</html>
