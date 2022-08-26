@@ -10,7 +10,8 @@ starting_station = 'newcastle'
 
 budget = 10
 
-df = data_parsing.get_isocost_stations(starting_station, budget, project_dir)```
+df = data_parsing.get_isocost_stations(starting_station, budget, project_dir)
+```
 
 project_dir must contain the path to the data (the data is currently not stored on the repo.
 
