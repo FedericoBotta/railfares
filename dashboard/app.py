@@ -2,11 +2,16 @@ from flask import Flask, render_template, request,jsonify
 # import json
 import railfares.data_parsing as data_parsing
 import pandas as pd
+import geopandas as gpd
 from matplotlib.colors import rgb2hex
 
 
 project_dir = '/Users/fb394/Documents/GitHub/railfares/'
 od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix.csv', low_memory = False)
+naptan_gdf = data_parsing.get_naptan_data(project_dir)
+naptan_gdf = naptan_gdf.to_crs(epsg = 4326)
+station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
+station_gdf = station_gdf.to_crs(epsg = 4326)
 app=Flask(__name__)
 @app.route('/', methods = ['GET', 'POST'])
 def root():
@@ -39,7 +44,7 @@ def plot_cost():
 
     # od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix.csv', low_memory = False)
 
-    exeter_od = od_list[od_list['Origin station name'] == starting_station].copy()
+    station_od = od_list[od_list['Origin station name'] == starting_station].copy()
 
     max_price = 300
     step = 10
@@ -60,19 +65,20 @@ def plot_cost():
         g = g - colour_step
         b = b - colour_step
         
-    exeter_od['marker_colour'] = pd.cut(exeter_od['fare'], bins = bins,
+    station_od['marker_colour'] = pd.cut(station_od['fare'], bins = bins,
                                         labels =labels)
 
-    exeter_od['Destination station name'] = exeter_od['Destination station name'].str.rstrip()
-    exeter_od['popupText'] = ['Starting station: ' + starting_station + ',<br> Destination station: ' + row['Destination station name'] + ',<br> Fare: £' + str(row['fare']).ljust(5,'0') for idx, row in exeter_od.iterrows()]
-
-    station_gdf = data_parsing.get_station_location(project_dir)
-    station_gdf = station_gdf.to_crs(epsg = 4326)
-
-
-    exeter_gdf = station_gdf.merge(exeter_od, left_on = 'CRS Code', right_on = 'destination_crs')
+    station_od['Destination station name'] = station_od['Destination station name'].str.rstrip()
+    station_od['popupText'] = ['Starting station: ' + starting_station + ',<br> Destination station: ' + row['Destination station name'] + ',<br> Fare: £' + str(row['fare']).ljust(4,'0') for idx, row in station_od.iterrows()]
     
-    return jsonify({'data': exeter_gdf.to_json()})
+    stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'}))
+
+
+    station_od_gdf = stations.merge(station_od, left_on = 'CRS Code', right_on = 'destination_crs')
+    
+    od_list_min = station_od_gdf.loc[station_od_gdf.groupby(['Destination station name'])['fare'].idxmin()]
+    
+    return jsonify({'data': od_list_min.to_json()})
 
 
 if __name__ == '__main__':

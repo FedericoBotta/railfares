@@ -3,15 +3,16 @@ import folium
 import pandas as pd
 from folium.plugins import MarkerCluster
 from matplotlib.colors import rgb2hex
+import geopandas as gpd
 import branca.colormap as cm
 
 project_dir = '/Users/fb394/Documents/GitHub/railfares/'
 
-starting_station = 'EXETER ST DAVIDS'
+starting_station = 'NEWCASTLE'
 
 od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix.csv')
 
-exeter_od = od_list[od_list['Origin station name'] == starting_station].copy()
+station_od = od_list[od_list['Origin station name'] == starting_station].copy()
 
 max_price = 300
 step = 10
@@ -35,43 +36,54 @@ for i in range(0, int(n_bins), 1):
 colormap = cm.LinearColormap(colors= labels, vmin = 0, vmax = max_price,
                              caption='Price (£) for anytime day single from ' + starting_station.lower())
 
-exeter_od['marker_colour'] = pd.cut(exeter_od['fare'], bins = bins,
+
+station_od['marker_colour'] = pd.cut(station_od['fare'], bins = bins,
                                     labels =labels)
 
-exeter_od['Destination station name'] = exeter_od['Destination station name'].str.rstrip()
+station_od['Destination station name'] = station_od['Destination station name'].str.rstrip()
 
-station_gdf = data_parsing.get_station_location(project_dir)
+naptan_gdf = data_parsing.get_naptan_data(project_dir)
+naptan_gdf = naptan_gdf.to_crs(epsg = 4326)
+station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
 station_gdf = station_gdf.to_crs(epsg = 4326)
+stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'}))
 
 
-exeter_gdf = station_gdf.merge(exeter_od, left_on = 'Station name', right_on = 'Destination station name')
+
+station_od_gdf = stations.merge(station_od, left_on = 'CRS Code', right_on = 'destination_crs')
+
+od_list_min = station_od_gdf.loc[station_od_gdf.groupby(['Destination station name'])['fare'].idxmin()]
 
 # cost_map = folium.Map(location = [station_gdf.dissolve().centroid[0].coords[0][1],station_gdf.dissolve().centroid[0].coords[0][0]], tiles = "Stamen Terrain", zoom_start = 5)
 
 
 cost_map = folium.Map(location = [station_gdf.dissolve().centroid[0].coords[0][1],station_gdf.dissolve().centroid[0].coords[0][0]], 
                       tiles = "https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZmVkZWJvdHRhIiwiYSI6ImNsNnZzZmx1bDA0aXozYnA5NHNxc2oxYm4ifQ.NH-kHQqlCLP3OVnx5ygJlQ",
-                      attr='mapbox', zoom_start = 5)
+                      attr='mapbox', zoom_start = 7)
+# svg_style = '<style>svg {background-color: white;}</style>'
 
+# colormap.get_root().header.add_child(folium.Element(svg_style))
+cost_map.add_child(colormap)
 
 marker_cluster = MarkerCluster(name = "Train stations").add_to(cost_map)
 
 
-for idx, row in exeter_gdf.iterrows():
+for idx, row in od_list_min.iterrows():
     
     
     folium.CircleMarker([row["geometry"].y, row['geometry'].x],
-                  icon=folium.Icon(color = 'white', icon_color=row['marker_colour']),
-                  fill = True, fill_color = row['marker_colour'], color = 'None', fill_opacity = 0.75, radius = 5,
+                  icon=folium.Icon(color = '#000000', icon_color=row['marker_colour']),
+                  fill = True, fill_color = row['marker_colour'], color = '#000000', fill_opacity = 0.75, radius = 8, weight = 1,
                   popup="Station: " + str(row['Station name'] + '<br>' + 'Fare: ' + str(row['fare']))).add_to(cost_map)
 
 
 
-cost_map.add_child(colormap)
 
 
-folium.LayerControl().add_to(cost_map)
-cost_map.save(project_dir + 'exeter_station_map.html')
+
+
+# folium.LayerControl().add_to(cost_map)
+cost_map.save(project_dir + 'newcastle_map.html')
 
 
 

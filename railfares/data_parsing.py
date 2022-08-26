@@ -984,25 +984,27 @@ def get_isocost_from_list_fast(station_flows_df, isocost, station_gdf, loc_recor
 
     Parameters
     ----------
-    station_flows_df : TYPE
-        DESCRIPTION.
-    isocost : TYPE
-        DESCRIPTION.
-    station_gdf : TYPE
-        DESCRIPTION.
-    loc_records_df : TYPE
-        DESCRIPTION.
-    clusters_dict : TYPE
-        DESCRIPTION.
-    project_dir : TYPE
-        DESCRIPTION.
-    inverse : TYPE, optional
-        DESCRIPTION. The default is False.
+    station_flows_df : Pandas dataframe
+        A data frame containing the flows corresponding to a specific starting station.
+    isocost : Pandas dataframe
+        A data frame containing the fares data for flows starting from a specific
+        station.
+    station_gdf : Geopandas dataframe.
+        A geo-data frame containing the stations.
+    loc_records_df : Pandas dataframe.
+        A data frame containing the location records retrieved from get_location_records('location record', project_dir).
+    clusters_dict : DICT
+        A dictionary linking station clusters to individual stations.
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+    inverse : BOOLEAN, optional
+        Whether we are looking at reverse flows. The default is False.
 
     Returns
     -------
-    TYPE
-        DESCRIPTION.
+    Pandas dataframe
+        A data frame containing the flows and associated fares. Station clusters
+        are disaggregated in the component stations of the cluster.
 
     '''
     
@@ -1048,6 +1050,26 @@ def get_isocost_from_list_fast(station_flows_df, isocost, station_gdf, loc_recor
     
 
 def get_isocost_stations(starting_station, budget, project_dir):
+    '''
+    Calculates the isocost for a given starting station and budget.
+
+    Parameters
+    ----------
+    starting_station : STRING
+        The name of the starting station.
+    budget : INTEGER
+        The maximum budget to be used for calculating routes.
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+
+    Returns
+    -------
+    Pandas dataframe.
+        A data frame containing all stations you can reach with a given budget
+        starting from the input starting station. Actual fares of the routes
+        are also included in the data frame.
+
+    '''
     
     
     tickets = get_ticket_type_records(project_dir)
@@ -1095,6 +1117,25 @@ def get_isocost_stations(starting_station, budget, project_dir):
     
 
 def plot_isocost_stations(starting_station_code, destination_stations, out_path, project_dir):
+    '''
+    Create an html map of the isocost from a station.
+
+    Parameters
+    ----------
+    starting_station_code : STRING
+        The starting station NLC code.
+    destination_stations : Pandas dataframe
+        A data frame containing all destination stations.
+    out_path : STRING
+        The path where the map will be saved..
+    project_dir : STRING
+        The directory where the project is hosted, needed for reading data files.
+
+    Returns
+    -------
+    None.
+
+    '''
     
     station_gdf = get_station_location(project_dir)
     station_gdf = station_gdf.to_crs(epsg = 4326)
