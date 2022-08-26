@@ -6,7 +6,7 @@ import folium
 
 project_dir = '/Users/fb394/Documents/GitHub/railfares/'
 
-starting_station = 'exeter st davids'
+starting_station = 'newcastle'
 
 isocost_lines = gpd.GeoDataFrame()
 

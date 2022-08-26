@@ -22,15 +22,15 @@
 <body>
 <div>
 
-
+<p> Select a starting station 
 <select id="dropdown" method="GET" action="/">
     {% for stats in list_stations %}
     <option value= "{{stats}}" SELECTED>{{stats}}</option>"
     {% endfor %}
 </select>
+</p>
 
-<p id="selected-dropdown"></p>
-<button id="station-button">Click me to get the data!</button>
+<button id="station-button">Retrieve and plot the data!</button>
 </div>
 <div id="map"></div>
 
@@ -52,6 +52,8 @@ var geojsonMarkerOptions = {
     fillOpacity: 0.8
 };
 
+var markersLayer = new L.LayerGroup();
+
 function onEachFeature(feature, layer) {
     if (feature.properties && feature.properties.popupText) {
         layer.bindPopup(feature.properties.popupText);
@@ -61,7 +63,6 @@ function onEachFeature(feature, layer) {
 d3.select('#station-button')
     .on("click", function(){
     var selected = d3.select("#dropdown").node().value;
-    d3.select("#selected-dropdown").text(selected);
     
             
     jQuery.ajax({
@@ -69,9 +70,7 @@ d3.select('#station-button')
          data: {"starting_station": selected},
          type: 'POST',
          success: function(data){
-         
-         console.log(jQuery.parseJSON(data.data));
-         
+         markersLayer.clearLayers();
          L.geoJSON( jQuery.parseJSON(data.data), {
     pointToLayer: function (feature, latlng) {
         return L.circleMarker(latlng, geojsonMarkerOptions)
@@ -80,9 +79,9 @@ d3.select('#station-button')
 return {fillColor: feature.properties.marker_colour}},
 
     onEachFeature: onEachFeature
-}).addTo(map);
+}).addTo(markersLayer);
          
-        
+        markersLayer.addTo(map);
          }
      })
      
