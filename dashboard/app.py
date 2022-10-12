@@ -27,7 +27,7 @@ def root():
 @app.route('/station_metrics/', methods = ['GET', 'POST'])
 def station_metrics():
     
-   metrics = ['Number of stations', 'Max distance', 'Mean distance', 'Median distance', 'Metric']
+   metrics = ['Number of stations', 'Max distance', 'Mean distance', 'Median distance', 'Metric', 'Population Metric', 'Reachable Population']
    
    budgets = [10,25,50,75,100,125,150,175,200]
    
@@ -96,13 +96,29 @@ def plot_stats_metrics():
     
     metric = request.form['metric_to_plot']
     
+    stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
     
+    la_file = gpd.read_file(project_dir + 'Local_Authority_Districts_(May_2021)_UK_BFE/LAD_MAY_2021_UK_BFE_V2.shp')
+    la_file = la_file.to_crs(epsg = 4326)
+
+    census_data = pd.read_excel(project_dir + 'census2021firstresultsenglandwales1.xlsx', sheet_name = 'P04', skiprows = 6,
+                                names = ['Area code', 'Area name', 'Population density'])
+
+    la_census = la_file.merge(census_data, left_on = 'LAD21CD', right_on = 'Area code')
+
+    station_la_pop = naptan_gdf.sjoin(la_census, how = 'left')
+
+    station_la_pop.dropna(subset = 'Population density', inplace = True)
     
-    stats_metrics = pd.read_csv(project_dir + 'stations_stats_'+ request.form['budget_to_plot'] +'_pounds.csv')
+    station_la_crs = station_la_pop.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'}).dropna().drop_duplicates('CRS Code')
+    
+    stats_metrics = pd.read_csv(project_dir + 'stations_stats_and_pop_'+ request.form['budget_to_plot'] +'_pounds.csv').merge(station_la_crs[['CRS Code', 'Population density']], left_on = 'Station CRS', right_on = 'CRS Code')
     stats_metrics['Mean distance'] = stats_metrics['Mean distance']/1000
     stats_metrics['Median distance'] = stats_metrics['Median distance']/1000
     stats_metrics['Max distance'] = stats_metrics['Max distance']/1000
     stats_metrics['Metric'] = stats_metrics['Number'] * stats_metrics['Median distance']/len(station_gdf['Station name'].unique())
+    stats_metrics['Population Metric'] = stats_metrics['Median distance']/(stats_metrics['Population density'])*100
+    stats_metrics['Reachable Population'] = stats_metrics['Reachable Population']/stats_metrics['Reachable Population'].max()*100
     # stats_metrics['Metric'] = stats_metrics['Median distance'] / stats_metrics['Number']*100
     stats_metrics['Number'] = stats_metrics['Number']/len(station_gdf['Station name'].unique())*100
     
@@ -111,18 +127,20 @@ def plot_stats_metrics():
         metric = 'Number'
         
     
-    stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
-    
-    
-    
     max_distance = round(stats_metrics[metric].max())
-    if metric == 'Metric' or metric == 'Number':
+    if metric == 'Number' or metric == 'Metric' :
         
-        step = 5
+        step = 1
+        # step = round(max_distance/100)
+    
+    elif metric == 'Population Metric':
         
+        step = round(max_distance/100)
+    
     else:
         
         step = 5
+        # step = round(max_distance/100)
         
     bins = list(range(0, max_distance + step, step))
     n_bins = math.ceil(max_distance / step)
@@ -153,7 +171,7 @@ def plot_stats_metrics():
         metric_string = 'Number of stations'
         data_to_map['popupString'] = '%'
     
-    elif metric == 'Metric':
+    elif metric == 'Metric' or metric == 'Population Metric' or metric == 'Reachable Population':
         
         metric_string = 'Index'
         data_to_map['popupString'] = ''

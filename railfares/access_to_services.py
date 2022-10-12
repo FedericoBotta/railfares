@@ -15,6 +15,9 @@ points = gpd.points_from_xy(data['Easting'], data['Northing'], crs = 'OSGB36 / B
 hospitals_gdf = gpd.GeoDataFrame(data, geometry = points)
 hospitals_gdf.to_crs(epsg = 27700, inplace = True)
 
+#hospitals_buffer_gdf = hospitals_gdf.copy()
+# hospitals_buffer_gdf['geometry'] = hospitals_buffer_gdf.geometry.buffer(5000)
+
 project_dir = '/Users/fb394/Documents/GitHub/railfares/'
 
 naptan_gdf = data_parsing.get_naptan_data(project_dir)
@@ -25,45 +28,85 @@ station_gdf = station_gdf.to_crs(epsg = 4326)
 stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'}))
 
 
+# stations_within_buffer = stations.sjoin(hospitals_buffer_gdf, how = 'left')
+
+# msoa_boundaries = gpd.read_file(project_dir + 'Middle_Layer_Super_Output_Areas_(December_2011)_Boundaries_Full_Clipped_(BFC)_EW_V3/Middle_Layer_Super_Output_Areas_(December_2011)_Boundaries_Full_Clipped_(BFC)_EW_V3.shp')
+
+# msoa_station_gdf = stations.sjoin(msoa_boundaries, how = 'left').drop('index_right', axis = 1)
+
+# msoa_hospitals_gdf = hospitals_buffer_gdf.sjoin(msoa_boundaries, how = 'left')
+
+# msoa_stations_hospitals = msoa_station_gdf.merge(msoa_hospitals_gdf, on = 'MSOA11CD')
+
+
 gb_boundary = gpd.read_file('http://geoportal1-ons.opendata.arcgis.com/datasets/f2c2211ff185418484566b2b7a5e1300_0.zip?outSR={%22latestWkid%22:27700,%22wkid%22:27700}')
 
 stations_gb_gdf = stations.sjoin(gb_boundary)
-stations_england_gdf = stations_gb_gdf[stations_gb_gdf['ctry17nm'] == 'England'].copy().drop('index_right', axis = 1)
+stations_england_gdf = stations_gb_gdf[stations_gb_gdf['ctry17nm'] == 'England'].copy().drop('index_right', axis = 1).dropna(axis = 0, subset = ['CRS Code'])
 
-
-closest_station_to_hospital_gdf = gpd.sjoin_nearest(hospitals_gdf, stations_england_gdf, max_distance = 2500, distance_col = 'distance')
+closest_station_to_hospital_gdf = gpd.sjoin_nearest(hospitals_gdf, stations_england_gdf, max_distance = 5000, distance_col = 'distance')[['SiteCode', 'SiteName', 'CommonName', 'TIPLOC', 'Station name', 'CRS Code', 'distance']]
 closest_station_to_hospital_gdf.rename(columns = {'CommonName': 'HospitalStationName', 'CRS Code': 'HospitalStationCRS'}, inplace = True)
 
-stations_to_closest_hospital_gdf = gpd.sjoin_nearest(stations_england_gdf, hospitals_gdf, distance_col = 'distance')
-stations_to_closest_hospital_gdf.rename(columns = {'CommonName': 'DepartingStation', 'CRS Code': 'DepartingCRS'}, inplace = True)
+# stations_to_closest_hospital_gdf = gpd.sjoin_nearest(stations_england_gdf, hospitals_gdf, distance_col = 'distance')
+# stations_to_closest_hospital_gdf.rename(columns = {'CommonName': 'DepartingStation', 'CRS Code': 'DepartingCRS'}, inplace = True)
 
-all_stations_to_hospital_gdf = stations_to_closest_hospital_gdf.merge(closest_station_to_hospital_gdf, on = 'SiteCode')
-
-
-
-
-
+# all_stations_to_hospital_gdf = stations_to_closest_hospital_gdf.merge(closest_station_to_hospital_gdf, on = 'SiteCode')
 
 
 od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix.csv', low_memory = False)
 
-subset_od_list = od_list[od_list['destination_crs'].isin(all_stations_to_hospital_gdf['HospitalStationCRS'].to_list())]
+subset_od_list = od_list[od_list['destination_crs'].isin(closest_station_to_hospital_gdf['HospitalStationCRS'])].reset_index(drop = True)
 
 hospital_fares = pd.DataFrame()
 
-for idx, row in all_stations_to_hospital_gdf.iterrows():
+for idx, row in stations_england_gdf.iterrows():
     
-    temp = subset_od_list[(subset_od_list['origin_crs'] == row['DepartingCRS']) & (subset_od_list['destination_crs'] == row['HospitalStationCRS'])].copy()
-    temp['Hospital'] = row['SiteName_x']
-    hospital_fares = pd.concat([hospital_fares, temp])
-    print(idx)
+    if subset_od_list['origin_crs'].str.contains(row['CRS Code']).any():
+        
+        temp = subset_od_list[subset_od_list['origin_crs'] == row['CRS Code']].merge(closest_station_to_hospital_gdf, left_on = 'destination_crs', right_on = 'HospitalStationCRS')
+        hospital_fares = pd.concat([hospital_fares, temp[temp['fare'] == temp['fare'].min()]])
+        print(row['Station name'])
+    
+    else:
+        
+        print('Not found')
+        print(row['Station name'])
+        print('---')
+
+hospital_fares.reset_index(drop = True, inplace = True)
+a = []
+for idx, row in hospital_fares.iterrows():
+    
+    if closest_station_to_hospital_gdf['HospitalStationCRS'].str.contains(row['origin_crs']).any():
+        
+        hospital_fares.at[idx, 'fare'] = 0
+        # print(row)
+        print(idx)
+        a.append(idx)
+        # break
 
 
-hospital_gdf = stations_england_gdf.merge(hospital_fares, left_on = 'CRS Code', right_on = 'origin_crs')
 
 
-max_price = 70
-step = 5
+
+
+# subset_od_list = od_list[od_list['destination_crs'].isin(all_stations_to_hospital_gdf['HospitalStationCRS'].to_list())]
+
+# hospital_fares = pd.DataFrame()
+
+# for idx, row in all_stations_to_hospital_gdf.iterrows():
+    
+#     temp = subset_od_list[(subset_od_list['origin_crs'] == row['DepartingCRS']) & (subset_od_list['destination_crs'] == row['HospitalStationCRS'])].copy()
+#     temp['Hospital'] = row['SiteName_x']
+#     hospital_fares = pd.concat([hospital_fares, temp])
+#     print(idx)
+
+
+hospital_fare_gdf = stations_england_gdf.merge(hospital_fares, left_on = 'CRS Code', right_on = 'origin_crs')
+
+
+max_price = 35
+step = 1
 bins = list(range(0, max_price + step, step))
 n_bins = max_price / step
 
@@ -84,7 +127,7 @@ for i in range(0, int(n_bins), 1):
 colormap = cm.LinearColormap(colors= labels, vmin = 0, vmax = max_price,
                              caption='Price (£)')
 
-hospital_gdf['marker_colour'] = pd.cut(hospital_gdf['fare'], bins = bins,
+hospital_fare_gdf['marker_colour'] = pd.cut(hospital_fare_gdf['fare'], bins = bins,
                                     labels =labels)
 
 
@@ -98,15 +141,15 @@ cost_map.add_child(colormap)
 
 marker_cluster = MarkerCluster(name = "Train stations").add_to(cost_map)
 
-hospital_gdf = hospital_gdf.to_crs(epsg = 4326)
+hospital_fare_gdf = hospital_fare_gdf.to_crs(epsg = 4326)
 
-for idx, row in hospital_gdf.iterrows():
+for idx, row in hospital_fare_gdf.iterrows():
     
     
     folium.CircleMarker([row["geometry"].y, row['geometry'].x],
                   icon=folium.Icon(color = '#000000', icon_color=row['marker_colour']),
                   fill = True, fill_color = row['marker_colour'], color = '#000000', fill_opacity = 0.75, radius = 8, weight = 1,
-                  popup="Station: " + str(row['Station name'] + '<br>' + 'Fare: ' + str(row['fare'])) + 'Hospital: ' +row['Hospital']).add_to(cost_map)
+                  popup="Station: " + str(row['Station name_x'] + '<br>' + 'Fare: ' + str(row['fare'])) + 'Hospital: ' +row['SiteName']).add_to(cost_map)
 
 
 
