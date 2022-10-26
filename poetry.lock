@@ -445,6 +445,14 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "et-xmlfile"
+version = "1.1.0"
+description = "An implementation of lxml.xmlfile for the standard library"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
 name = "fastjsonschema"
 version = "2.16.1"
 description = "Fastest Python implementation of JSON schema"
@@ -1135,6 +1143,17 @@ python-versions = "*"
 
 [package.dependencies]
 defusedxml = "*"
+
+[[package]]
+name = "openpyxl"
+version = "3.0.10"
+description = "A Python library to read/write Excel 2010 xlsx/xlsm files"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+et-xmlfile = "*"
 
 [[package]]
 name = "packaging"
@@ -2407,7 +2426,9 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "3d17e886fb5d49d5367e65b73aa6809a6ffa4f3c89814c65fa22740c1baed1d8"
+
+content-hash = "87addfe4836e39caf8317a1df0fa75927e9575dca0b99a736f0b5e497bf3d349"
+
 
 [metadata.files]
 affine = [
@@ -2694,10 +2715,12 @@ entrypoints = [
     {file = "entrypoints-0.4-py3-none-any.whl", hash = "sha256:f174b5ff827504fd3cd97cc3f8649f3693f51538c7e4bdf3ef002c8429d42f9f"},
     {file = "entrypoints-0.4.tar.gz", hash = "sha256:b706eddaa9218a19ebcd67b56818f05bb27589b1ca9e8d797b74affad4ccacd4"},
 ]
-fastjsonschema = [
-    {file = "fastjsonschema-2.16.1-py3-none-any.whl", hash = "sha256:2f7158c4de792555753d6c2277d6a2af2d406dfd97aeca21d17173561ede4fe6"},
-    {file = "fastjsonschema-2.16.1.tar.gz", hash = "sha256:d6fa3ffbe719768d70e298b9fb847484e2bdfdb7241ed052b8d57a9294a8c334"},
-]
+
+fastjsonschema = []
+
+et-xmlfile = []
+fastjsonschema = []
+>>>>>>> 318578268ef91fafa999ed5dedc00c27131b55d5
 fiona = [
     {file = "Fiona-1.8.21-cp310-cp310-macosx_10_10_x86_64.whl", hash = "sha256:39c656421e25b4d0d73d0b6acdcbf9848e71f3d9b74f44c27d2d516d463409ae"},
     {file = "Fiona-1.8.21-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:43b1d2e45506e56cf3a9f59ba5d6f7981f3f75f4725d1e6cb9a33ba856371ebd"},
@@ -3178,6 +3201,7 @@ numpydoc = [
 odfpy = [
     {file = "odfpy-1.4.1.tar.gz", hash = "sha256:db766a6e59c5103212f3cc92ec8dd50a0f3a02790233ed0b52148b70d3c438ec"},
 ]
+openpyxl = []
 packaging = [
     {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},
     {file = "packaging-21.3.tar.gz", hash = "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"},

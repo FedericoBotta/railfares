@@ -19,8 +19,11 @@ station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
 station_gdf = station_gdf.to_crs(epsg = 4326)
 stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
 
+msoa_census = pd.read_excel(project_dir + 'sape23dt4mid2020msoasyoaestimatesunformatted.xlsx', sheet_name = 'Mid-2020 Persons', engine = 'openpyxl', skiprows = 4)[['MSOA Code', 'All Ages']]
+msoa_boundaries = gpd.read_file(project_dir + 'Middle_Layer_Super_Output_Areas_(December_2011)_Boundaries_Full_Clipped_(BFC)_EW_V3/Middle_Layer_Super_Output_Areas_(December_2011)_Boundaries_Full_Clipped_(BFC)_EW_V3.shp')
+msoa_boundaries_pop = msoa_boundaries.merge(msoa_census, left_on = 'MSOA11CD', right_on = 'MSOA Code')
 
-budget = 200
+budget = 100
 
 stn_numbers = pd.DataFrame()
 
@@ -40,12 +43,18 @@ for idx, row in stations.iterrows():
             
             temp_gdf['distance'] = temp_gdf.geometry.apply(lambda x: row['geometry'].distance(x))
             
-            stn_numbers = pd.concat([stn_numbers, pd.DataFrame([[row['CRS Code'], len(temp['Destination station name'].unique()), temp_gdf['distance'].max(), temp_gdf['distance'].mean(), temp_gdf['distance'].median()]], columns = ['Station CRS', 'Number', 'Max distance', 'Mean distance', 'Median distance'])])
+            stn_numbers = pd.concat([stn_numbers, pd.DataFrame([[row['CRS Code'], len(temp['Destination station name'].unique()), temp_gdf['distance'].max(), temp_gdf['distance'].mean(), temp_gdf['distance'].median(), temp_gdf.sjoin(msoa_boundaries_pop, how = 'left').drop_duplicates(subset = ['MSOA Code'])['All Ages'].sum()]],
+                                                               columns = ['Station CRS', 'Number', 'Max distance', 'Mean distance', 'Median distance', 'Reachable Population'])])
             
             print(row['CRS Code'])
         
 
-stn_numbers.to_csv(project_dir + 'stations_stats_200_pounds.csv')
+stn_numbers.to_csv(project_dir + 'stations_stats_and_pop_' + str(budget) + '_pounds.csv')
+
+
+
+
+
 
 # stn_numbers['Mean distance'] = stn_numbers['Mean distance']/1000
 
