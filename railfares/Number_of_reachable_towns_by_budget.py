@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import pandas as pd
 import geopandas as gpd
 import railfares.data_parsing as data_parsing
@@ -78,7 +80,7 @@ for idx, row in stations_england_gdf.iterrows():
 town_fares.drop_duplicates(subset = ['origin_crs', 'TownStationCRS'], inplace = True)
 town_fares.reset_index(drop = True, inplace = True)
 
-reachable_towns = town_fares.groupby(['origin_crs'])['SiteName'].count().reset_index().rename({'SiteName': 'Count'}, axis = 1)
+reachable_towns = town_fares.groupby(['origin_crs'])['Town_Name'].count().reset_index().rename({'Town_Name': 'Count'}, axis = 1)
 
 
 for idx, row in reachable_towns.iterrows():
