@@ -89,5 +89,5 @@ for b in budget:
             
             reachable_hospitals.at[idx, 'Count'] = reachable_hospitals.at[idx, 'Count'] + 1
 
-    reachable_hospitals.to_csv(project_dir + 'number_hospitals_' + b + '_pounds.csv')
+    reachable_hospitals.to_csv(project_dir + 'number_hospitals_' + str(b) + '_pounds.csv')
 
