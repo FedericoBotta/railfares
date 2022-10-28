@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Flask Leaflet Website</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/universal.css') }}" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+  crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+  integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+  crossorigin=""></script>
+<script src="static/js/leaflet-providers.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+
+</head>
+
+<body>
+<ul class="menu">
+            <li><a href="/">Home</a></li>
+            <li><a href="{{ url_for('station_metrics') }}">Station metrics</a></li>
+            <li><a href="{{ url_for('hospital_metrics') }}">Hospital metrics</a></li>
+            <li><a href="{{ url_for('employment_metrics') }}">Employment metrics</a></li>
+          </ul>
+<div>
+
+<p> Select a budget
+<select id="dropdown-budget" method="GET" action="/">
+    {% for budget in budgets%}
+    <option value= "{{budget}}" BUDGET>{{budget}}</option>"
+    {% endfor %}
+</select>
+</p>
+<p> Select a metric to plot
+<select id="dropdown" method="GET" action="/">
+    {% for stats in metrics %}
+    <option value= "{{stats}}" SELECTED>{{stats}}</option>"
+    {% endfor %}
+</select>
+</p>
+
+<button id="station-button">Retrieve and plot the data!</button>
+</div>
+<div id="map" style= "width:95% "></div> 
+
+
+
+<script>
+
+var map = L.map('map').setView([52, 0], 7);
+L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZmVkZWJvdHRhIiwiYSI6ImNsNnZzZmx1bDA0aXozYnA5NHNxc2oxYm4ifQ.NH-kHQqlCLP3OVnx5ygJlQ', {
+attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+preferCanvas: true
+}).addTo(map); 
+
+
+var geojsonMarkerOptions = {
+    radius: 8,
+    color: "#000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8
+};
+
+var markersLayer = new L.LayerGroup();
+
+function onEachFeature(feature, layer) {
+    if (feature.properties && feature.properties.popupText) {
+        layer.bindPopup(feature.properties.popupText);
+    }
+};
+
+d3.select('#station-button')
+    .on("click", function(){
+    var selected = d3.select("#dropdown").node().value;
+    var budget_selected = d3.select("#dropdown-budget").node().value;
+    
+            
+    jQuery.ajax({
+         url: "/PlotEmploymentMetrics",
+         data: {"metric_to_plot": selected, "budget_to_plot": budget_selected},
+         type: 'POST',
+         success: function(data){
+        console.log(budget_selected);
+         markersLayer.clearLayers();
+         L.geoJSON( jQuery.parseJSON(data.data), {
+    pointToLayer: function (feature, latlng) {
+        return L.circleMarker(latlng, geojsonMarkerOptions)
+    }
+, style: function(feature){
+return {fillColor: feature.properties.marker_colour}},
+
+    onEachFeature: onEachFeature
+}).addTo(markersLayer);
+         
+        markersLayer.addTo(map);
+         }
+     })
+     
+    });
+</script>
+</body>
+
+</html>
