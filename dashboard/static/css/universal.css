@@ -6,3 +6,29 @@ html, body, #map {
 height: 100%;
 width: 100vw;
 }
+
+.main-button{
+margin-top: 5px;
+height: 75px;
+width: 300px;
+font-size: 24px;
+font-family: MyriadPro;
+background-color: #F0B4B4;
+}
+
+.plot-button{
+margin-top: 5px;
+margin-bottom:5px;
+height: 75px;
+width: 300px;
+font-size:24px;
+font-family: MyriadPro;
+background-color: #F07878;
+}
+
+
+
+.main-sep-line{
+height: 5px;
+background: #3C3C3C;
+}

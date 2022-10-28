@@ -20,7 +20,8 @@ def root():
     
    station_gdf = data_parsing.get_station_location(project_dir)
     
-   list_stations = station_gdf['Station name'].unique()
+   list_stations = station_gdf['Station name'].unique().tolist()
+   # list_stations.reverse()
    
    return render_template('index.html', list_stations = list_stations)
 

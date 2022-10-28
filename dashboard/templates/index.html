@@ -20,25 +20,51 @@
 </head>
 
 <body>
+<!--
 <ul class="menu">
             <li><a href="/">Home</a></li>
             <li><a href="{{ url_for('station_metrics') }}">Station metrics</a></li>
             <li><a href="{{ url_for('hospital_metrics') }}">Hospital metrics</a></li>
             <li><a href="{{ url_for('employment_metrics') }}">Employment metrics</a></li>
           </ul>
+-->
 <div>
-
-<p> Select a starting station 
-<select id="dropdown" method="GET" action="/">
+<button class = "main-button" type="button" onclick="location.href= '/'" disabled>Cost from station</button>
+<button class = "main-button" type="button" onclick="location.href= {{ url_for('station_metrics') }}">Station accessibility</button>
+<button class = "main-button" type="button" onclick="location.href= {{ url_for('hospital_metrics') }}">Hospital accessibility</button>
+<button class = "main-button" type="button" onclick="location.href= {{ url_for('employment_metrics') }}">Employment accessibility</button>
+<hr class = "main-sep-line">
+<p style = "font-size: 24px" "font-family: MyriadPro"> Here, you can see the cheapest fare to reach any train station in Great Britain from any starting station you select. The analysis assumes that you are using a single any-time ticket, and fares are accurate as of February 2022.
+Note that the cheapest fare displayed here typically does not correspond to the fastest or more efficient train journey, and this is particularly true for long journeys.
+<br><br>
+<!--
+Select a starting station 
+<select id="dropdown" method="GET" action="/" data-dropup-auto="false">
     {% for stats in list_stations %}
     <option value= "{{stats}}" SELECTED>{{stats}}</option>"
     {% endfor %}
+   <<option disabled selected value style="display:none"></option>
 </select>
+-->
+<form id = "dropdown" action="">
+        <label style = "font-size: 24px" "font-family: MyriadPro">Pick a starting station: </label>
+        <input list="stations" id = "stationlist">
+        <datalist id="stations">
+             {% for stats in list_stations %}
+             <option value= "{{stats}}" SELECTED>{{stats}}</option>"
+             {% endfor %}
+            <<option disabled selected value style="display:none"></option>
+         </select>
+        </datalist>
+    </form>
+
+
 </p>
 
-<button id="station-button">Retrieve and plot the data!</button>
+<button class = "plot-button" id="station-button">Retrieve and plot the data!</button>
+<br><br>
 </div>
-<div id="map"></div>
+<div id="map" style= "width:95% "></div> 
 
 
 <script>
@@ -68,7 +94,10 @@ function onEachFeature(feature, layer) {
 
 d3.select('#station-button')
     .on("click", function(){
-    var selected = d3.select("#dropdown").node().value;
+    
+    var selected = stationlist.value;
+    
+    <!---var selected = d3.select("#dropdown").node().value;-->
     
             
     jQuery.ajax({

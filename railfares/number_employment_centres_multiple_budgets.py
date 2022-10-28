@@ -40,7 +40,7 @@ subset_od_list = od_list[od_list['destination_crs'].isin(closest_station_to_empl
 
 employment_centre_fares = pd.DataFrame()
 
-budget = [10,25,50,75,100,125,150,175,200]
+budget = [150,175,200]
 
 for b in budget:
 
