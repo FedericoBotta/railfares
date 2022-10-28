@@ -42,6 +42,17 @@ def hospital_metrics():
    
    return render_template('hospital_metrics.html', metrics = metrics, budgets = budgets)
 
+
+@app.route('/employment_metrics/', methods = ['GET', 'POST'])
+def employment_metrics():
+    
+   metrics = ['Count']
+   
+   budgets = [10,25,50,75,100,125,150,175,200]
+   
+   return render_template('employment_metrics.html', metrics = metrics, budgets = budgets)
+
+
 @app.route('/GetStationsGDF', methods = ['GET','POST'])
 def get_stations_gdf():
     print('hello from app.py')
@@ -240,7 +251,50 @@ def plot_hospital_metrics():
     
     return jsonify({'data': data_to_map.to_json()})
 
+@app.route('/PlotEmploymentMetrics', methods = ['GET', 'POST'])
+def plot_employment_metrics():
+    
+    metric = request.form['metric_to_plot']
+    
+    stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
+    stations.to_crs(epsg = 4326, inplace = True)
+    
+    employment_metrics = pd.read_csv(project_dir + 'number_large_employment_centres_'+ request.form['budget_to_plot'] +'_pounds.csv').merge(stations[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
+    
+    
+    max_count = round(employment_metrics[metric].max())
+    
+    step = 5
+        
+    bins = list(range(0, max_count + step, step))
+    n_bins = math.ceil(max_count / step)
 
+
+    labels = []
+    colour_step = 240/n_bins
+
+    r = 240
+    g = 240
+    b= 240
+
+    for i in range(0, int(n_bins), 1):
+        
+        labels.append(rgb2hex([r/255, (g)/255, (b)/255]))
+        g = g - colour_step
+        b = b - colour_step
+        
+    employment_metrics['marker_colour'] = pd.cut(employment_metrics[metric], bins = bins,
+                                        labels =labels)
+    
+    data_to_map = stations.merge(employment_metrics, left_on = 'CRS Code', right_on = 'origin_crs', how = 'right')
+    
+    data_to_map = data_to_map.to_crs(epsg = 4326)
+    
+    metric_string = metric
+    
+    data_to_map['popupText'] = ['Starting station: ' + row['Station name'] + ',<br> ' + metric_string + ': ' + str(round(row[metric])) for idx, row in data_to_map.iterrows()]
+    
+    return jsonify({'data': data_to_map.to_json()})
 
     
     
