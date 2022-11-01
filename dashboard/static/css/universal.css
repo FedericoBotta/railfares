@@ -14,6 +14,7 @@ width: 300px;
 font-size: 24px;
 font-family: MyriadPro;
 background-color: #F0B4B4;
+border: 2px solid black;
 }
 
 .plot-button{
@@ -24,6 +25,7 @@ width: 300px;
 font-size:24px;
 font-family: MyriadPro;
 background-color: #F07878;
+border: 2px solid black;
 }
 
 
