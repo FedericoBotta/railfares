@@ -65,7 +65,7 @@ This means that most stations will actually be reachable with a lower budget.
 
 We start by specifying the name of a starting station, for instance Exeter St Davids:
 
-````bash
+```bash
 starting_station = 'exeter st davids'
 ```
 
