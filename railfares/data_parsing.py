@@ -951,7 +951,7 @@ def get_isocost_from_list(station_flows_df, isocost, project_dir, inverse = Fals
 
     '''
     
-    temp_isocost_route = station_flows_df[(station_flows_df['flow_id'].isin(isocost['flow_id'].to_list())) & (station_flows_df['end_date'] == '31122999')]
+    temp_isocost_route = station_flows_df[(station_flows_df['flow_id'].isin(isocost['flow_id'].to_list())) & (station_flows_df['end_date'] == '31122999')].copy()
     
     if not inverse:
         
@@ -1092,7 +1092,7 @@ def get_isocost_stations(starting_station, budget, project_dir):
     station_list = station_flows_df['flow_id'].to_list()
     station_fares_df = fares_df[fares_df['flow_id'].isin(station_list)]
     # station_tickets = tickets[tickets['ticket_code'].isin(station_fares_df['ticket_code'].to_list())]
-    station_singles = station_fares_df[station_fares_df['ticket_code'].isin(single_tickets['ticket_code'].to_list())]
+    station_singles = station_fares_df[station_fares_df['ticket_code'].isin(single_tickets['ticket_code'].to_list())].copy()
     station_singles['fare'] = station_singles['fare'].astype(int)/100
     
     #look if flows/routes exist in reverse direction
@@ -1100,7 +1100,7 @@ def get_isocost_stations(starting_station, budget, project_dir):
     inverse_station_list = inverse_station_flows_df['flow_id'].to_list()
     inverse_station_fares_df = fares_df[fares_df['flow_id'].isin(inverse_station_list)]
     # inverse_station_tickets = tickets[tickets['ticket_code'].isin(inverse_station_fares_df['ticket_code'].to_list())]
-    inverse_station_singles = inverse_station_fares_df[inverse_station_fares_df['ticket_code'].isin(single_tickets['ticket_code'].to_list())]
+    inverse_station_singles = inverse_station_fares_df[inverse_station_fares_df['ticket_code'].isin(single_tickets['ticket_code'].to_list())].copy()
     inverse_station_singles['fare'] = inverse_station_singles['fare'].astype(int)/100
     
     
@@ -1156,11 +1156,10 @@ def plot_isocost_stations(starting_station_code, destination_stations, out_path,
     duplicate_stations = []
     
     
-    cost_map = folium.Map(location = [stats_gdf.dissolve().centroid[0].coords[0][1],stats_gdf.dissolve().centroid[0].coords[0][0]], tiles = "Stamen Terrain", zoom_start = 10)
+    cost_map = folium.Map(location = [stats_gdf.dissolve().centroid[0].coords[0][1],stats_gdf.dissolve().centroid[0].coords[0][0]], tiles = "https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZmVkZWJvdHRhIiwiYSI6ImNsNnZzZmx1bDA0aXozYnA5NHNxc2oxYm4ifQ.NH-kHQqlCLP3OVnx5ygJlQ", attr = 'mapbox', zoom_start = 10)
     for idx, row in stats_gdf.iterrows():
         
         if row['Station name'] not in duplicate_stations:
-            print(row['Station name'])
             
             duplicate_stations.append(row['Station name'])
             
