@@ -9,7 +9,7 @@ import folium
 
 project_dir = ''
 
-#specify the name of a starting station; for instance, newcastle.
+#specify the name of a starting station; for instance, Exetet St Davids.
 starting_station = 'exeter st davids'
 
 #specify the maximum budget to use for the isocost calculation
