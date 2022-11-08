@@ -45,7 +45,7 @@ The functions of this package are implemented in ```data_parsing.py```. Any othe
 
 To start with, let's import all the relevant packages we will need in this tutorial:
 
-```
+```bash
 import railfares.data_parsing as data_parsing
 import pandas as pd
 import geopandas as gpd
@@ -55,7 +55,7 @@ import folium
 ```
 We then need to set the project directory, which is where the data files are stored:
 
-```
+```bash
 project_dir = 'USE_PROJECT_DIRECTORY_PATH'
 ```
 
@@ -65,17 +65,17 @@ This means that most stations will actually be reachable with a lower budget.
 
 We start by specifying the name of a starting station, for instance Exeter St Davids:
 
-````
+````bash
 starting_station = 'exeter st davids'
 ```
 
 We then specify the maximum budget we want to use for the calculation:
-```
+```bash
 budget = 10
 ```
 Again, as noted above, this is a maximum fare, not the exact fare.
 Next, we calculate the isocost:
-```
+```bash
 isocost = data_parsing.get_isocost_stations(starting_station, budget, project_dir)
 ```
 
@@ -88,7 +88,7 @@ station code names, etc.
 
 You can then create a map of the stations that can be reached. The following
 outputs to file an interactive html map:
-````
+```bash
 #first, set the file path and name (use .html as file extension)
 file_path_name = 'USE_PATH_AND_FILE_NAME_TO_OUTPUT'
 
@@ -101,7 +101,7 @@ any station from the starting station. NOTE: this section requires to have the O
 
 First, read the OD file. This is a large file so will take some time to read
 and use a significant amount of memory:
-```
+```bash
 od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix.csv', low_memory = False)
 ```
 
@@ -110,7 +110,7 @@ NOTE: the starting station string is converted to upper as in the OD matrix
 this is how the station names typically appear. This is for the tutorial purpose
 only, as in general it is more accurate to work with CRS or TIPLOC codes which are
 unique and do not depend on abbreviation of station names.
-```
+```bash
 station_od = od_list[od_list['Origin station name'] == starting_station.upper()].copy()
 ```
 
@@ -122,7 +122,7 @@ of 300 GBP; however, in practice this is usually not exceeded for journeys consi
 here, but might need to be changed if considering a different type of journeys.
 
 The
-```
+```bash
 max_price = 300
 step = 10
 bins = list(range(0, max_price + step, step))
