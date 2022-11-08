@@ -95,6 +95,9 @@ file_path_name = 'USE_PATH_AND_FILE_NAME_TO_OUTPUT'
 #then create and output the map
 data_parsing.plot_isocost_stations(starting_station, isocost, file_path_name, project_dir)
 ````
+This should result in the following map:
+
+<img src = "Figures/exeter_10_pounds_isocost.html"/>
 
 You can also use the pre-calculated OD matrix to retrieve the cost of reaching
 any station from the starting station. NOTE: this section requires to have the OD matrix file
