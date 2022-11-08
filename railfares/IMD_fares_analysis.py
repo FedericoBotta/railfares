@@ -45,7 +45,7 @@ for idx, row in stations_lsoa_gdf.iterrows():
         
         print(row['CRS Code'])
 
-stn_numbers_gdf = gpd.GeoDataFrame(stn_numbers, crs = "EPSG:4326")
+stn_numbers_gdf = gpd.GeoDataFrame(stn_numbers, crs = "EPSG:27700")
 
 stn_numbers_gdf.to_file(project_dir + 'stations_lsoa_statistics.geojson', driver = 'GeoJSON')
 
