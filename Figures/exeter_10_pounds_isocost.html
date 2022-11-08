@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<head>    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+    
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.6.0/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_280f794ebbc843cb88a44a222314d03e {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+            </style>
+        
+</head>
+<body>    
+    
+            <div class="folium-map" id="map_280f794ebbc843cb88a44a222314d03e" ></div>
+        
+</body>
+<script>    
+    
+            var map_280f794ebbc843cb88a44a222314d03e = L.map(
+                "map_280f794ebbc843cb88a44a222314d03e",
+                {
+                    center: [50.76926551592534, -3.5874399853407155],
+                    crs: L.CRS.EPSG3857,
+                    zoom: 10,
+                    zoomControl: true,
+                    preferCanvas: false,
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_35eeda358c8b71948643306c221c80cf = L.tileLayer(
+                "https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZmVkZWJvdHRhIiwiYSI6ImNsNnZzZmx1bDA0aXozYnA5NHNxc2oxYm4ifQ.NH-kHQqlCLP3OVnx5ygJlQ",
+                {"attribution": "mapbox", "detectRetina": false, "maxNativeZoom": 18, "maxZoom": 18, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var marker_1b32c47b1ffdbf71e3edd8fdf29e5605 = L.marker(
+                [51.07358401378177, -4.063970464133135],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_4f5436ea5604547dc5a1da588950a6a7 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_1b32c47b1ffdbf71e3edd8fdf29e5605.setIcon(icon_4f5436ea5604547dc5a1da588950a6a7);
+        
+    
+        var popup_dfd21b68d83cd723e36dfcb611aa0995 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_e19bb99abd763935512faea4dfdf09a1 = $(`<div id="html_e19bb99abd763935512faea4dfdf09a1" style="width: 100.0%; height: 100.0%;">Station: BARNSTAPLE<br>Fares: <br>£7.00</div>`)[0];
+            popup_dfd21b68d83cd723e36dfcb611aa0995.setContent(html_e19bb99abd763935512faea4dfdf09a1);
+        
+
+        marker_1b32c47b1ffdbf71e3edd8fdf29e5605.bindPopup(popup_dfd21b68d83cd723e36dfcb611aa0995)
+        ;
+
+        
+    
+    
+            var marker_c6529bed51f8f15d71fcfb723c32ecfb = L.marker(
+                [51.0158207503444, -4.024334285466123],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_1ea4aa994f98c0a3b6ee033f7cdb1a0d = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_c6529bed51f8f15d71fcfb723c32ecfb.setIcon(icon_1ea4aa994f98c0a3b6ee033f7cdb1a0d);
+        
+    
+        var popup_433872aae63bf364153fc60bd802c540 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_ab5455514a99d598ea8ebc25291bba46 = $(`<div id="html_ab5455514a99d598ea8ebc25291bba46" style="width: 100.0%; height: 100.0%;">Station: CHAPELTON (DEVON)<br>Fares: <br>£7.00</div>`)[0];
+            popup_433872aae63bf364153fc60bd802c540.setContent(html_ab5455514a99d598ea8ebc25291bba46);
+        
+
+        marker_c6529bed51f8f15d71fcfb723c32ecfb.bindPopup(popup_433872aae63bf364153fc60bd802c540)
+        ;
+
+        
+    
+    
+            var marker_ef7fe07c9a20a974eaafa8198c7a1e50 = L.marker(
+                [50.814285049621525, -3.75156488577564],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_8352a77eb8ace25feeedacedfa3ce490 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_ef7fe07c9a20a974eaafa8198c7a1e50.setIcon(icon_8352a77eb8ace25feeedacedfa3ce490);
+        
+    
+        var popup_30475ff1f8c7d61eb66a700e27e16e93 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_6ed731caba09e18b0c3017394a964613 = $(`<div id="html_6ed731caba09e18b0c3017394a964613" style="width: 100.0%; height: 100.0%;">Station: COPPLESTONE<br>Fares: <br>£4.00</div>`)[0];
+            popup_30475ff1f8c7d61eb66a700e27e16e93.setContent(html_6ed731caba09e18b0c3017394a964613);
+        
+
+        marker_ef7fe07c9a20a974eaafa8198c7a1e50.bindPopup(popup_30475ff1f8c7d61eb66a700e27e16e93)
+        ;
+
+        
+    
+    
+            var marker_91eb8b7c56f6cdae8bf8386129c0e22e = L.marker(
+                [50.75047628230039, -3.417464244237856],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_75a0f9a74a0b6e6ac9725a50e716915c = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_91eb8b7c56f6cdae8bf8386129c0e22e.setIcon(icon_75a0f9a74a0b6e6ac9725a50e716915c);
+        
+    
+        var popup_92333113c8b5385c9a798bc60350feee = L.popup({"maxWidth": "100%"});
+
+        
+            var html_9c03e20f5f32367f6e9711596b6efedb = $(`<div id="html_9c03e20f5f32367f6e9711596b6efedb" style="width: 100.0%; height: 100.0%;">Station: CRANBROOK (DEVON)<br>Fares: <br>£3.90</div>`)[0];
+            popup_92333113c8b5385c9a798bc60350feee.setContent(html_9c03e20f5f32367f6e9711596b6efedb);
+        
+
+        marker_91eb8b7c56f6cdae8bf8386129c0e22e.bindPopup(popup_92333113c8b5385c9a798bc60350feee)
+        ;
+
+        
+    
+    
+            var marker_50d113dd42eee34d505d40a038912278 = L.marker(
+                [50.783434795499915, -3.6468531114899627],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_e4b28db2e4fb9ef02d47e2510016b516 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_50d113dd42eee34d505d40a038912278.setIcon(icon_e4b28db2e4fb9ef02d47e2510016b516);
+        
+    
+        var popup_93527e1b1039933b5e898c4693c60362 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_437e071d0ba9edd86c79e01fdcd80a1e = $(`<div id="html_437e071d0ba9edd86c79e01fdcd80a1e" style="width: 100.0%; height: 100.0%;">Station: CREDITON<br>Fares: <br>£2.70</div>`)[0];
+            popup_93527e1b1039933b5e898c4693c60362.setContent(html_437e071d0ba9edd86c79e01fdcd80a1e);
+        
+
+        marker_50d113dd42eee34d505d40a038912278.bindPopup(popup_93527e1b1039933b5e898c4693c60362)
+        ;
+
+        
+    
+    
+            var marker_00959bb993e719568ce2829570f426f5 = L.marker(
+                [50.858696073625616, -3.3923266528877476],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_7242350b1e3baf7ad735823c5916d30a = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_00959bb993e719568ce2829570f426f5.setIcon(icon_7242350b1e3baf7ad735823c5916d30a);
+        
+    
+        var popup_6136acb638e8eed6ca5b9fff919299cf = L.popup({"maxWidth": "100%"});
+
+        
+            var html_32e734627063a9bbde616fa129368a91 = $(`<div id="html_32e734627063a9bbde616fa129368a91" style="width: 100.0%; height: 100.0%;">Station: CULLOMPTON BUS<br>Fares: <br>£9.10</div>`)[0];
+            popup_6136acb638e8eed6ca5b9fff919299cf.setContent(html_32e734627063a9bbde616fa129368a91);
+        
+
+        marker_00959bb993e719568ce2829570f426f5.bindPopup(popup_6136acb638e8eed6ca5b9fff919299cf)
+        ;
+
+        
+    
+    
+            var marker_5662661b681d95ec58eb67c49b7539bd = L.marker(
+                [50.580818703409456, -3.4646251265538903],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_f7581373ea3e8c71a6620070f7b54f4a = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_5662661b681d95ec58eb67c49b7539bd.setIcon(icon_f7581373ea3e8c71a6620070f7b54f4a);
+        
+    
+        var popup_c0602869d48f7976dd2c46cc9ea310a0 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_6c40736bcedcd57808401d26d301f764 = $(`<div id="html_6c40736bcedcd57808401d26d301f764" style="width: 100.0%; height: 100.0%;">Station: DAWLISH<br>Fares: <br>£6.90</div>`)[0];
+            popup_c0602869d48f7976dd2c46cc9ea310a0.setContent(html_6c40736bcedcd57808401d26d301f764);
+        
+
+        marker_5662661b681d95ec58eb67c49b7539bd.bindPopup(popup_c0602869d48f7976dd2c46cc9ea310a0)
+        ;
+
+        
+    
+    
+            var marker_6549884c4a96331e265430adc4f022d8 = L.marker(
+                [50.59906320572716, -3.4439961490925066],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_d4e7b5ab2b30e358c7c591a3cb5e4934 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_6549884c4a96331e265430adc4f022d8.setIcon(icon_d4e7b5ab2b30e358c7c591a3cb5e4934);
+        
+    
+        var popup_17795df402223dfa1d5c058168ed4b49 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_9a126c5ec4024ee98c31adfa0dde1ad7 = $(`<div id="html_9a126c5ec4024ee98c31adfa0dde1ad7" style="width: 100.0%; height: 100.0%;">Station: DAWLISH WARREN<br>Fares: <br>£5.70</div>`)[0];
+            popup_17795df402223dfa1d5c058168ed4b49.setContent(html_9a126c5ec4024ee98c31adfa0dde1ad7);
+        
+
+        marker_6549884c4a96331e265430adc4f022d8.bindPopup(popup_17795df402223dfa1d5c058168ed4b49)
+        ;
+
+        
+    
+    
+            var marker_862898d7573c96232a1c2ceadc76916f = L.marker(
+                [50.71649363703522, -3.4745172234935784],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_bf18f1b930e5bc32699db4689a691082 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_862898d7573c96232a1c2ceadc76916f.setIcon(icon_bf18f1b930e5bc32699db4689a691082);
+        
+    
+        var popup_075475001c260ba32df63dd8397a5549 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_37d75d880426cc72b2377779d5249a5d = $(`<div id="html_37d75d880426cc72b2377779d5249a5d" style="width: 100.0%; height: 100.0%;">Station: DIGBY & SOWTON<br>Fares: <br>£3.40</div>`)[0];
+            popup_075475001c260ba32df63dd8397a5549.setContent(html_37d75d880426cc72b2377779d5249a5d);
+        
+
+        marker_862898d7573c96232a1c2ceadc76916f.bindPopup(popup_075475001c260ba32df63dd8397a5549)
+        ;
+
+        
+    
+    
+            var marker_09ae3aa2c2046269b8684142bbcc900f = L.marker(
+                [50.88790789577854, -3.875178500522051],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_58d251cccec8a5ee52acf1ca2cc09a61 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_09ae3aa2c2046269b8684142bbcc900f.setIcon(icon_58d251cccec8a5ee52acf1ca2cc09a61);
+        
+    
+        var popup_7e98b0b10fcaa084bede85d92ec9a48c = L.popup({"maxWidth": "100%"});
+
+        
+            var html_d0c3e29e83662a6ff8daceeecdd33465 = $(`<div id="html_d0c3e29e83662a6ff8daceeecdd33465" style="width: 100.0%; height: 100.0%;">Station: EGGESFORD<br>Fares: <br>£5.80</div>`)[0];
+            popup_7e98b0b10fcaa084bede85d92ec9a48c.setContent(html_d0c3e29e83662a6ff8daceeecdd33465);
+        
+
+        marker_09ae3aa2c2046269b8684142bbcc900f.bindPopup(popup_7e98b0b10fcaa084bede85d92ec9a48c)
+        ;
+
+        
+    
+    
+            var marker_26785a4f11e5940f14e03dc4855320cd = L.marker(
+                [50.72653204430469, -3.5329237249951966],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_62f95af09955c1565692f151dcc7b6dd = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_26785a4f11e5940f14e03dc4855320cd.setIcon(icon_62f95af09955c1565692f151dcc7b6dd);
+        
+    
+        var popup_23ccdc1bc1b081126090bb00b1e2ee74 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_973313b119750f9ae3c23bee12195c0e = $(`<div id="html_973313b119750f9ae3c23bee12195c0e" style="width: 100.0%; height: 100.0%;">Station: EXETER CENTRAL<br>Fares: <br>£1.90</div>`)[0];
+            popup_23ccdc1bc1b081126090bb00b1e2ee74.setContent(html_973313b119750f9ae3c23bee12195c0e);
+        
+
+        marker_26785a4f11e5940f14e03dc4855320cd.bindPopup(popup_23ccdc1bc1b081126090bb00b1e2ee74)
+        ;
+
+        
+    
+    
+            var marker_bee7b21e5af7da387739277d1177bc8e = L.marker(
+                [50.71655034033118, -3.539680801359403],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_07d834bcf80f7e0939629c384add1908 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_bee7b21e5af7da387739277d1177bc8e.setIcon(icon_07d834bcf80f7e0939629c384add1908);
+        
+    
+        var popup_947931f153169c5e8c7910306ddd6376 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_f18ee269a013c45bc60c476ac80cac50 = $(`<div id="html_f18ee269a013c45bc60c476ac80cac50" style="width: 100.0%; height: 100.0%;">Station: EXETER ST THOMAS<br>Fares: <br>£1.90</div>`)[0];
+            popup_947931f153169c5e8c7910306ddd6376.setContent(html_f18ee269a013c45bc60c476ac80cac50);
+        
+
+        marker_bee7b21e5af7da387739277d1177bc8e.bindPopup(popup_947931f153169c5e8c7910306ddd6376)
+        ;
+
+        
+    
+    
+            var marker_5d92569546e65072514eef74494e8078 = L.marker(
+                [50.62100346524921, -3.414980926618383],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_5363957df34d335535f0360ddc3a67b3 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_5d92569546e65072514eef74494e8078.setIcon(icon_5363957df34d335535f0360ddc3a67b3);
+        
+    
+        var popup_7316d8fb86291987b9c4f271d7c968ac = L.popup({"maxWidth": "100%"});
+
+        
+            var html_4f03ea83c1149ee4eb0b0ce41ecf2d2a = $(`<div id="html_4f03ea83c1149ee4eb0b0ce41ecf2d2a" style="width: 100.0%; height: 100.0%;">Station: EXMOUTH<br>Fares: <br>£5.60</div>`)[0];
+            popup_7316d8fb86291987b9c4f271d7c968ac.setContent(html_4f03ea83c1149ee4eb0b0ce41ecf2d2a);
+        
+
+        marker_5d92569546e65072514eef74494e8078.bindPopup(popup_7316d8fb86291987b9c4f271d7c968ac)
+        ;
+
+        
+    
+    
+            var marker_19e1ac42b9021a364bc32c60b318f93e = L.marker(
+                [50.668320833180374, -3.4432900920784775],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_1a35a3a1c9b4c9eddf395be36f446d57 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_19e1ac42b9021a364bc32c60b318f93e.setIcon(icon_1a35a3a1c9b4c9eddf395be36f446d57);
+        
+    
+        var popup_a9e4145e0e0a87721b3fb3bb2f0cabe7 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_137a51977bb9ce6c2bcf157fd5b9b2ae = $(`<div id="html_137a51977bb9ce6c2bcf157fd5b9b2ae" style="width: 100.0%; height: 100.0%;">Station: EXTON<br>Fares: <br>£4.50</div>`)[0];
+            popup_a9e4145e0e0a87721b3fb3bb2f0cabe7.setContent(html_137a51977bb9ce6c2bcf157fd5b9b2ae);
+        
+
+        marker_19e1ac42b9021a364bc32c60b318f93e.bindPopup(popup_a9e4145e0e0a87721b3fb3bb2f0cabe7)
+        ;
+
+        
+    
+    
+            var marker_6a92ad5ab7f8232f9adcb54746c0a75f = L.marker(
+                [50.787082091592914, -3.285215988211499],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_0cfddd6520060ec822ab95392b4f505b = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_6a92ad5ab7f8232f9adcb54746c0a75f.setIcon(icon_0cfddd6520060ec822ab95392b4f505b);
+        
+    
+        var popup_c3e8d19293aae1327e48d932c79ef83e = L.popup({"maxWidth": "100%"});
+
+        
+            var html_b5324ec54e35c87187026eaba0059d86 = $(`<div id="html_b5324ec54e35c87187026eaba0059d86" style="width: 100.0%; height: 100.0%;">Station: FENITON<br>Fares: <br>£6.00</div>`)[0];
+            popup_c3e8d19293aae1327e48d932c79ef83e.setContent(html_b5324ec54e35c87187026eaba0059d86);
+        
+
+        marker_6a92ad5ab7f8232f9adcb54746c0a75f.bindPopup(popup_c3e8d19293aae1327e48d932c79ef83e)
+        ;
+
+        
+    
+    
+            var marker_e208e179858dbafbbb50d67bef33ae55 = L.marker(
+                [50.79712463072385, -3.186164002182843],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_ce3830f188c9c96d402d117be84fc384 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_e208e179858dbafbbb50d67bef33ae55.setIcon(icon_ce3830f188c9c96d402d117be84fc384);
+        
+    
+        var popup_53cdd66c39d6138de980d4de8f3552c0 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_ddb0decd2f3a708df98ab9ab72d5b661 = $(`<div id="html_ddb0decd2f3a708df98ab9ab72d5b661" style="width: 100.0%; height: 100.0%;">Station: HONITON<br>Fares: <br>£8.00<br>£8.00<br>£8.00<br>£8.00</div>`)[0];
+            popup_53cdd66c39d6138de980d4de8f3552c0.setContent(html_ddb0decd2f3a708df98ab9ab72d5b661);
+        
+
+        marker_e208e179858dbafbbb50d67bef33ae55.bindPopup(popup_53cdd66c39d6138de980d4de8f3552c0)
+        ;
+
+        
+    
+    
+            var marker_0f16e00ef09553a93a3120de6a7ab361 = L.marker(
+                [50.79712463072385, -3.186164002182843],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_8f11599d2000088eeb806bf65ce7bd96 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_0f16e00ef09553a93a3120de6a7ab361.setIcon(icon_8f11599d2000088eeb806bf65ce7bd96);
+        
+    
+        var popup_ee57f3afb07a4643b0c2ea97b7ba79cc = L.popup({"maxWidth": "100%"});
+
+        
+            var html_5f53e5acfa33fafff1ff06ad169bfe3f = $(`<div id="html_5f53e5acfa33fafff1ff06ad169bfe3f" style="width: 100.0%; height: 100.0%;">Station: HONITON<br>Fares: <br>£8.00<br>£8.00<br>£8.00<br>£8.00</div>`)[0];
+            popup_ee57f3afb07a4643b0c2ea97b7ba79cc.setContent(html_5f53e5acfa33fafff1ff06ad169bfe3f);
+        
+
+        marker_0f16e00ef09553a93a3120de6a7ab361.bindPopup(popup_ee57f3afb07a4643b0c2ea97b7ba79cc)
+        ;
+
+        
+    
+    
+            var marker_9610690182b3beba3aabc6d94f610003 = L.marker(
+                [50.79712463072385, -3.186164002182843],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_979e7f39d1f21ecfc4e36aee6f82085e = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_9610690182b3beba3aabc6d94f610003.setIcon(icon_979e7f39d1f21ecfc4e36aee6f82085e);
+        
+    
+        var popup_bde06a83f3626797e525ba10aadaff96 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_a1b1b0601fb6f56566878bc0a3631cf0 = $(`<div id="html_a1b1b0601fb6f56566878bc0a3631cf0" style="width: 100.0%; height: 100.0%;">Station: HONITON<br>Fares: <br>£8.00<br>£8.00<br>£8.00<br>£8.00</div>`)[0];
+            popup_bde06a83f3626797e525ba10aadaff96.setContent(html_a1b1b0601fb6f56566878bc0a3631cf0);
+        
+
+        marker_9610690182b3beba3aabc6d94f610003.bindPopup(popup_bde06a83f3626797e525ba10aadaff96)
+        ;
+
+        
+    
+    
+            var marker_ab89cb464b593bb813b3135943a2dea9 = L.marker(
+                [50.79712463072385, -3.186164002182843],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_5b6cfc39f91ecdcbeb49eea729f4f675 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_ab89cb464b593bb813b3135943a2dea9.setIcon(icon_5b6cfc39f91ecdcbeb49eea729f4f675);
+        
+    
+        var popup_3537defea39e918bdca7686e2f081299 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_f83f3bfe18c73b26e9e7cf68524e4130 = $(`<div id="html_f83f3bfe18c73b26e9e7cf68524e4130" style="width: 100.0%; height: 100.0%;">Station: HONITON<br>Fares: <br>£8.00<br>£8.00<br>£8.00<br>£8.00</div>`)[0];
+            popup_3537defea39e918bdca7686e2f081299.setContent(html_f83f3bfe18c73b26e9e7cf68524e4130);
+        
+
+        marker_ab89cb464b593bb813b3135943a2dea9.bindPopup(popup_3537defea39e918bdca7686e2f081299)
+        ;
+
+        
+    
+    
+            var marker_4d402d5bc3e7811874e035ae0f8c70e8 = L.marker(
+                [50.93597970685074, -3.905577603439097],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_b6baf388cc7e57f2b46069831ff4d8fa = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_4d402d5bc3e7811874e035ae0f8c70e8.setIcon(icon_b6baf388cc7e57f2b46069831ff4d8fa);
+        
+    
+        var popup_ba27dcaa5dd86e6e325f7a0505b39334 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_f87ee5cc9a8b00fa9a57cd2b5b2c5090 = $(`<div id="html_f87ee5cc9a8b00fa9a57cd2b5b2c5090" style="width: 100.0%; height: 100.0%;">Station: KINGS NYMPTON<br>Fares: <br>£7.00</div>`)[0];
+            popup_ba27dcaa5dd86e6e325f7a0505b39334.setContent(html_f87ee5cc9a8b00fa9a57cd2b5b2c5090);
+        
+
+        marker_4d402d5bc3e7811874e035ae0f8c70e8.bindPopup(popup_ba27dcaa5dd86e6e325f7a0505b39334)
+        ;
+
+        
+    
+    
+            var marker_98ff3c4b2a97c073dc30ead374a4412f = L.marker(
+                [50.85743811832741, -3.811437144873642],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_a18e3db77c7d7a3149bae2a344feb29f = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_98ff3c4b2a97c073dc30ead374a4412f.setIcon(icon_a18e3db77c7d7a3149bae2a344feb29f);
+        
+    
+        var popup_244275a5161acfc274ae0448ff291801 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_d3b09714b28fa5d0507272bfbf71ebf8 = $(`<div id="html_d3b09714b28fa5d0507272bfbf71ebf8" style="width: 100.0%; height: 100.0%;">Station: LAPFORD<br>Fares: <br>£5.00</div>`)[0];
+            popup_244275a5161acfc274ae0448ff291801.setContent(html_d3b09714b28fa5d0507272bfbf71ebf8);
+        
+
+        marker_98ff3c4b2a97c073dc30ead374a4412f.bindPopup(popup_244275a5161acfc274ae0448ff291801)
+        ;
+
+        
+    
+    
+            var marker_32278116b4e532ad702fa673d834e572 = L.marker(
+                [50.661181391270084, -3.4388265100134565],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_fd09ed653c0e8df9d6da9692f43b264c = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_32278116b4e532ad702fa673d834e572.setIcon(icon_fd09ed653c0e8df9d6da9692f43b264c);
+        
+    
+        var popup_8404986e9556fc569182bdcf38d4feb1 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_6b784c989fbc4269b6a6ea821f030054 = $(`<div id="html_6b784c989fbc4269b6a6ea821f030054" style="width: 100.0%; height: 100.0%;">Station: LYMPSTONE COMMANDO<br>Fares: <br>£5.20</div>`)[0];
+            popup_8404986e9556fc569182bdcf38d4feb1.setContent(html_6b784c989fbc4269b6a6ea821f030054);
+        
+
+        marker_32278116b4e532ad702fa673d834e572.bindPopup(popup_8404986e9556fc569182bdcf38d4feb1)
+        ;
+
+        
+    
+    
+            var marker_c144a6b2df250e62b8881ee3d1dbec51 = L.marker(
+                [50.64868256624512, -3.4313720385125284],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_ef99ae0611f973ef75104e0921f20a76 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_c144a6b2df250e62b8881ee3d1dbec51.setIcon(icon_ef99ae0611f973ef75104e0921f20a76);
+        
+    
+        var popup_7b7a79085e90b74ef2232e1e8fff3479 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_45097f77946717a9aa61b0b8e3e784b1 = $(`<div id="html_45097f77946717a9aa61b0b8e3e784b1" style="width: 100.0%; height: 100.0%;">Station: LYMPSTONE VILLAGE<br>Fares: <br>£5.20</div>`)[0];
+            popup_7b7a79085e90b74ef2232e1e8fff3479.setContent(html_45097f77946717a9aa61b0b8e3e784b1);
+        
+
+        marker_c144a6b2df250e62b8881ee3d1dbec51.bindPopup(popup_7b7a79085e90b74ef2232e1e8fff3479)
+        ;
+
+        
+    
+    
+            var marker_c38ea95ecbed112daa45a4caf0d910ab = L.marker(
+                [50.83189669660684, -3.7763657141331546],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_867d27842b2cb004df1f729488ec5efb = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_c38ea95ecbed112daa45a4caf0d910ab.setIcon(icon_867d27842b2cb004df1f729488ec5efb);
+        
+    
+        var popup_ef6df1637f40f5c242489b20581c52c9 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_a9d4c6f5f218ee3c9164f5580af3f30b = $(`<div id="html_a9d4c6f5f218ee3c9164f5580af3f30b" style="width: 100.0%; height: 100.0%;">Station: MORCHARD ROAD<br>Fares: <br>£4.00</div>`)[0];
+            popup_ef6df1637f40f5c242489b20581c52c9.setContent(html_a9d4c6f5f218ee3c9164f5580af3f30b);
+        
+
+        marker_c38ea95ecbed112daa45a4caf0d910ab.bindPopup(popup_ef6df1637f40f5c242489b20581c52c9)
+        ;
+
+        
+    
+    
+            var marker_70c5d687c38cabe03dce9de3f2c0ef5f = L.marker(
+                [50.70302697507515, -3.472678541593237],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_9215b00bdad8388dbf0d6438e73f18d6 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_70c5d687c38cabe03dce9de3f2c0ef5f.setIcon(icon_9215b00bdad8388dbf0d6438e73f18d6);
+        
+    
+        var popup_b4b94eab731647e45f6d15329ca144a8 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_3cba9354d1b85e6bbb99113daa20a845 = $(`<div id="html_3cba9354d1b85e6bbb99113daa20a845" style="width: 100.0%; height: 100.0%;">Station: NEWCOURT<br>Fares: <br>£3.50</div>`)[0];
+            popup_b4b94eab731647e45f6d15329ca144a8.setContent(html_3cba9354d1b85e6bbb99113daa20a845);
+        
+
+        marker_70c5d687c38cabe03dce9de3f2c0ef5f.bindPopup(popup_b4b94eab731647e45f6d15329ca144a8)
+        ;
+
+        
+    
+    
+            var marker_4016f13d21bf68f93201b72bbfaed60f = L.marker(
+                [50.529573727132735, -3.5999000757088533],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_5687432adc0bd3aaaff67cf61c15a998 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_4016f13d21bf68f93201b72bbfaed60f.setIcon(icon_5687432adc0bd3aaaff67cf61c15a998);
+        
+    
+        var popup_8314d2d07e27ff9a62c62ab6a2bd84f3 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_badfd5a4d15bf73aa7de322b4c56a17a = $(`<div id="html_badfd5a4d15bf73aa7de322b4c56a17a" style="width: 100.0%; height: 100.0%;">Station: NEWTON ABBOT<br>Fares: <br>£9.30</div>`)[0];
+            popup_8314d2d07e27ff9a62c62ab6a2bd84f3.setContent(html_badfd5a4d15bf73aa7de322b4c56a17a);
+        
+
+        marker_4016f13d21bf68f93201b72bbfaed60f.bindPopup(popup_8314d2d07e27ff9a62c62ab6a2bd84f3)
+        ;
+
+        
+    
+    
+            var marker_18b1c5fc3472170378fb1a2e13bdf25f = L.marker(
+                [50.77884790546303, -3.5885351654238273],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_4c41ce0557fb2cbd65c6ce9d2511c1a1 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_18b1c5fc3472170378fb1a2e13bdf25f.setIcon(icon_4c41ce0557fb2cbd65c6ce9d2511c1a1);
+        
+    
+        var popup_8ed5ecc6aea71dd277967d9adf8f36c8 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_68dbac82e9251848f42999f93d5c9d84 = $(`<div id="html_68dbac82e9251848f42999f93d5c9d84" style="width: 100.0%; height: 100.0%;">Station: NEWTON ST CYRES<br>Fares: <br>£2.30</div>`)[0];
+            popup_8ed5ecc6aea71dd277967d9adf8f36c8.setContent(html_68dbac82e9251848f42999f93d5c9d84);
+        
+
+        marker_18b1c5fc3472170378fb1a2e13bdf25f.bindPopup(popup_8ed5ecc6aea71dd277967d9adf8f36c8)
+        ;
+
+        
+    
+    
+            var marker_c61741b0bb01db9c1951f2eee5b846f2 = L.marker(
+                [50.73752081791037, -3.995299669673603],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_bbd5887f867e192f9e0d9870a541783d = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_c61741b0bb01db9c1951f2eee5b846f2.setIcon(icon_bbd5887f867e192f9e0d9870a541783d);
+        
+    
+        var popup_be08bf5a126cf04f8593c0098a89fc83 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_88fc024522da940823482f2b092d9ff8 = $(`<div id="html_88fc024522da940823482f2b092d9ff8" style="width: 100.0%; height: 100.0%;">Station: OKEHAMPTON<br>Fares: <br>£4.00</div>`)[0];
+            popup_be08bf5a126cf04f8593c0098a89fc83.setContent(html_88fc024522da940823482f2b092d9ff8);
+        
+
+        marker_c61741b0bb01db9c1951f2eee5b846f2.bindPopup(popup_be08bf5a126cf04f8593c0098a89fc83)
+        ;
+
+        
+    
+    
+            var marker_dcb2c007143b702e5b180d3caaf88d85 = L.marker(
+                [50.73814043447952, -3.4695282669993532],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_62a911477f3cd3287c2a6235f9c40db5 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_dcb2c007143b702e5b180d3caaf88d85.setIcon(icon_62a911477f3cd3287c2a6235f9c40db5);
+        
+    
+        var popup_207334912429286e09a1666128f9443c = L.popup({"maxWidth": "100%"});
+
+        
+            var html_bb1af79263f75989f65de47b4833d270 = $(`<div id="html_bb1af79263f75989f65de47b4833d270" style="width: 100.0%; height: 100.0%;">Station: PINHOE<br>Fares: <br>£3.00</div>`)[0];
+            popup_207334912429286e09a1666128f9443c.setContent(html_bb1af79263f75989f65de47b4833d270);
+        
+
+        marker_dcb2c007143b702e5b180d3caaf88d85.bindPopup(popup_207334912429286e09a1666128f9443c)
+        ;
+
+        
+    
+    
+            var marker_9706fb221ea9a40196f69afcb1c73320 = L.marker(
+                [50.73145068041267, -3.500493041971945],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_562750db061fa877a716721ca2a4bef8 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_9706fb221ea9a40196f69afcb1c73320.setIcon(icon_562750db061fa877a716721ca2a4bef8);
+        
+    
+        var popup_91d5b9d9240bcc97c3d3deff01eb5af0 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_118b90aa51c3472342c906f6edb9da1a = $(`<div id="html_118b90aa51c3472342c906f6edb9da1a" style="width: 100.0%; height: 100.0%;">Station: POLSLOE BRIDGE<br>Fares: <br>£2.90</div>`)[0];
+            popup_91d5b9d9240bcc97c3d3deff01eb5af0.setContent(html_118b90aa51c3472342c906f6edb9da1a);
+        
+
+        marker_9706fb221ea9a40196f69afcb1c73320.bindPopup(popup_91d5b9d9240bcc97c3d3deff01eb5af0)
+        ;
+
+        
+    
+    
+            var marker_baa05995f5d260f48b58417de03d6691 = L.marker(
+                [50.956820619717156, -3.950571837041946],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_2d32f7b826d65e644df4cab09a41a883 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_baa05995f5d260f48b58417de03d6691.setIcon(icon_2d32f7b826d65e644df4cab09a41a883);
+        
+    
+        var popup_b88da99fcae8e6664c68ee888bd8d55f = L.popup({"maxWidth": "100%"});
+
+        
+            var html_a918b66fd52d9edb94f8fb9e3ee94e36 = $(`<div id="html_a918b66fd52d9edb94f8fb9e3ee94e36" style="width: 100.0%; height: 100.0%;">Station: PORTSMOUTH ARMS<br>Fares: <br>£7.00</div>`)[0];
+            popup_b88da99fcae8e6664c68ee888bd8d55f.setContent(html_a918b66fd52d9edb94f8fb9e3ee94e36);
+        
+
+        marker_baa05995f5d260f48b58417de03d6691.bindPopup(popup_b88da99fcae8e6664c68ee888bd8d55f)
+        ;
+
+        
+    
+    
+            var marker_d15fa361c59ccef259e844c7c5647bd5 = L.marker(
+                [50.73115674349493, -3.5231556822841528],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_0787a4db13573e636e4235d6e8468599 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_d15fa361c59ccef259e844c7c5647bd5.setIcon(icon_0787a4db13573e636e4235d6e8468599);
+        
+    
+        var popup_8dbf4ffc0ff28d30da775d669bf4144a = L.popup({"maxWidth": "100%"});
+
+        
+            var html_058e247fe6da4fce7681f1a9f3e5c834 = $(`<div id="html_058e247fe6da4fce7681f1a9f3e5c834" style="width: 100.0%; height: 100.0%;">Station: ST JAMES PARK (EXETER)<br>Fares: <br>£2.40</div>`)[0];
+            popup_8dbf4ffc0ff28d30da775d669bf4144a.setContent(html_058e247fe6da4fce7681f1a9f3e5c834);
+        
+
+        marker_d15fa361c59ccef259e844c7c5647bd5.bindPopup(popup_8dbf4ffc0ff28d30da775d669bf4144a)
+        ;
+
+        
+    
+    
+            var marker_7dfa73304eebd3f90c940bb79bd3f99d = L.marker(
+                [50.62779602718039, -3.4477041399209805],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_96dc553152544d6fa31f3e17b4c7de90 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_7dfa73304eebd3f90c940bb79bd3f99d.setIcon(icon_96dc553152544d6fa31f3e17b4c7de90);
+        
+    
+        var popup_ac212daf1cdc0644afb312b7a6e5dd46 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_e4be77c52b732cc4c63285aa62255766 = $(`<div id="html_e4be77c52b732cc4c63285aa62255766" style="width: 100.0%; height: 100.0%;">Station: STARCROSS<br>Fares: <br>£5.10</div>`)[0];
+            popup_ac212daf1cdc0644afb312b7a6e5dd46.setContent(html_e4be77c52b732cc4c63285aa62255766);
+        
+
+        marker_7dfa73304eebd3f90c940bb79bd3f99d.bindPopup(popup_ac212daf1cdc0644afb312b7a6e5dd46)
+        ;
+
+        
+    
+    
+            var marker_8281e83e9edf5b2a63d6480166f179b3 = L.marker(
+                [50.54806039570011, -3.4946626853891987],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_997bf94a8bccca6701a2bb843eac1c4c = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_8281e83e9edf5b2a63d6480166f179b3.setIcon(icon_997bf94a8bccca6701a2bb843eac1c4c);
+        
+    
+        var popup_021a4a099a3eff377cece536b6298104 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_909559b701cb5b216d4ed3a087584f0a = $(`<div id="html_909559b701cb5b216d4ed3a087584f0a" style="width: 100.0%; height: 100.0%;">Station: TEIGNMOUTH<br>Fares: <br>£8.00</div>`)[0];
+            popup_021a4a099a3eff377cece536b6298104.setContent(html_909559b701cb5b216d4ed3a087584f0a);
+        
+
+        marker_8281e83e9edf5b2a63d6480166f179b3.bindPopup(popup_021a4a099a3eff377cece536b6298104)
+        ;
+
+        
+    
+    
+            var marker_e80449c9bc5dbcf1e80c23f8eb52924b = L.marker(
+                [50.90250481456778, -3.48607568506394],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_180131c887a4d3914d0578d748ea4e69 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_e80449c9bc5dbcf1e80c23f8eb52924b.setIcon(icon_180131c887a4d3914d0578d748ea4e69);
+        
+    
+        var popup_188eb9956bdd0e039bcbaeb245b80d63 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_1608ea1677e8ced111052e823859b0b9 = $(`<div id="html_1608ea1677e8ced111052e823859b0b9" style="width: 100.0%; height: 100.0%;">Station: TIVERTON BUS<br>Fares: <br>£9.00</div>`)[0];
+            popup_188eb9956bdd0e039bcbaeb245b80d63.setContent(html_1608ea1677e8ced111052e823859b0b9);
+        
+
+        marker_e80449c9bc5dbcf1e80c23f8eb52924b.bindPopup(popup_188eb9956bdd0e039bcbaeb245b80d63)
+        ;
+
+        
+    
+    
+            var marker_258582cd4b84b73b8f75671e60b10a3b = L.marker(
+                [50.917532092081224, -3.3599389162122884],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_2b6c69fa5f6cde9732bab16d1b265ae2 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_258582cd4b84b73b8f75671e60b10a3b.setIcon(icon_2b6c69fa5f6cde9732bab16d1b265ae2);
+        
+    
+        var popup_a64873eece0a9cb23f9d3f1da880b3b6 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_9d8cdca57a9488f084bac507ac89e6e4 = $(`<div id="html_9d8cdca57a9488f084bac507ac89e6e4" style="width: 100.0%; height: 100.0%;">Station: TIVERTON PARKWAY<br>Fares: <br>£6.70</div>`)[0];
+            popup_a64873eece0a9cb23f9d3f1da880b3b6.setContent(html_9d8cdca57a9488f084bac507ac89e6e4);
+        
+
+        marker_258582cd4b84b73b8f75671e60b10a3b.bindPopup(popup_a64873eece0a9cb23f9d3f1da880b3b6)
+        ;
+
+        
+    
+    
+            var marker_76fea4f95bc60746ce81dc783c2514ed = L.marker(
+                [50.68605343074406, -3.463653127561086],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_5f780481042140e4684c4c962699c5cd = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_76fea4f95bc60746ce81dc783c2514ed.setIcon(icon_5f780481042140e4684c4c962699c5cd);
+        
+    
+        var popup_8f77c037ac9c717665bef316fc41f4a8 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_d7522b35f3784c74b0017809ca9683b3 = $(`<div id="html_d7522b35f3784c74b0017809ca9683b3" style="width: 100.0%; height: 100.0%;">Station: TOPSHAM<br>Fares: <br>£3.50</div>`)[0];
+            popup_8f77c037ac9c717665bef316fc41f4a8.setContent(html_d7522b35f3784c74b0017809ca9683b3);
+        
+
+        marker_76fea4f95bc60746ce81dc783c2514ed.bindPopup(popup_8f77c037ac9c717665bef316fc41f4a8)
+        ;
+
+        
+    
+    
+            var marker_d9cd21e945913b9f4ad80a44760097af = L.marker(
+                [50.996758531337484, -3.9821747596966333],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_ef1cc82bcee854f7ac038a470bf3bc68 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_d9cd21e945913b9f4ad80a44760097af.setIcon(icon_ef1cc82bcee854f7ac038a470bf3bc68);
+        
+    
+        var popup_b1a84aa26527e40250f8859a369692a0 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_8d3e67de3719ed8856131f9d438ea02b = $(`<div id="html_8d3e67de3719ed8856131f9d438ea02b" style="width: 100.0%; height: 100.0%;">Station: UMBERLEIGH<br>Fares: <br>£7.00</div>`)[0];
+            popup_b1a84aa26527e40250f8859a369692a0.setContent(html_8d3e67de3719ed8856131f9d438ea02b);
+        
+
+        marker_d9cd21e945913b9f4ad80a44760097af.bindPopup(popup_b1a84aa26527e40250f8859a369692a0)
+        ;
+
+        
+    
+    
+            var marker_da513b9332a0d335b03b8c7e7abe54e7 = L.marker(
+                [50.76831536258015, -3.3541885231828337],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_0b9ff1fa915f6001148e02d154022e7f = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_da513b9332a0d335b03b8c7e7abe54e7.setIcon(icon_0b9ff1fa915f6001148e02d154022e7f);
+        
+    
+        var popup_ef7dba2cbb236ae9d1cfdd157bc9ee52 = L.popup({"maxWidth": "100%"});
+
+        
+            var html_1282f33afe0ca0408ef26f90f6fcab50 = $(`<div id="html_1282f33afe0ca0408ef26f90f6fcab50" style="width: 100.0%; height: 100.0%;">Station: WHIMPLE<br>Fares: <br>£4.90</div>`)[0];
+            popup_ef7dba2cbb236ae9d1cfdd157bc9ee52.setContent(html_1282f33afe0ca0408ef26f90f6fcab50);
+        
+
+        marker_da513b9332a0d335b03b8c7e7abe54e7.bindPopup(popup_ef7dba2cbb236ae9d1cfdd157bc9ee52)
+        ;
+
+        
+    
+    
+            var marker_2876119af9c7f0b7ca735d88b6c00481 = L.marker(
+                [50.77689323955429, -3.726054149812411],
+                {}
+            ).addTo(map_280f794ebbc843cb88a44a222314d03e);
+        
+    
+            var icon_a7cb8f70aa6dc0c22455ffa866b089ca = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_2876119af9c7f0b7ca735d88b6c00481.setIcon(icon_a7cb8f70aa6dc0c22455ffa866b089ca);
+        
+    
+        var popup_ea82ef51f54c1496dd03334b5526429c = L.popup({"maxWidth": "100%"});
+
+        
+            var html_0b0b06957fac8432f7a17e0019f57bf0 = $(`<div id="html_0b0b06957fac8432f7a17e0019f57bf0" style="width: 100.0%; height: 100.0%;">Station: YEOFORD<br>Fares: <br>£3.60</div>`)[0];
+            popup_ea82ef51f54c1496dd03334b5526429c.setContent(html_0b0b06957fac8432f7a17e0019f57bf0);
+        
+
+        marker_2876119af9c7f0b7ca735d88b6c00481.bindPopup(popup_ea82ef51f54c1496dd03334b5526429c)
+        ;
+
+        
+    
+</script>

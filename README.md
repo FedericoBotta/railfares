@@ -121,7 +121,6 @@ In order to create a map with a good colour scheme, we set a maximum price
 of 300 GBP; however, in practice this is usually not exceeded for journeys considered
 here, but might need to be changed if considering a different type of journeys.
 
-The
 ```bash
 max_price = 300
 step = 10
