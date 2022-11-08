@@ -97,7 +97,7 @@ data_parsing.plot_isocost_stations(starting_station, isocost, file_path_name, pr
 ````
 This should result in the following map:
 
-<iframe src = "Figures/exeter_10_pounds_isocost.html"/>
+<iframe src = "Figures/exeter_10_pounds_isocost.html" width="600" height="450" frameborder="0" style="border:0" allowfullscreen></iframe>
 
 You can also use the pre-calculated OD matrix to retrieve the cost of reaching
 any station from the starting station. NOTE: this section requires to have the OD matrix file
