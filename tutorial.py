@@ -5,6 +5,7 @@ from folium.plugins import MarkerCluster
 from matplotlib.colors import rgb2hex
 import folium
 
+# NOTE: the mapping functionalities currently use the free-tier services of MapBox to retrieve the map tiles via my account API token. Please create maps in moderation, or replace the token with a different one!
 
 
 project_dir = ''
