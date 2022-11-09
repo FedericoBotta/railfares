@@ -194,3 +194,5 @@ The resulting map should look something like this:
 
 <img src = "Figures/exeter_cost_map.png"/>
 
+where darker shades of red correspond to a higher fare.
+
