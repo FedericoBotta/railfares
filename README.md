@@ -43,6 +43,8 @@ This is a brief tutorial on how to use this package. The tutorial is also avaiab
 
 The functions of this package are implemented in ```data_parsing.py```. Any other script is analysing the rail fares data using the basic functions implemented in the package.
 
+NOTE: the mapping functionalities currently use the free-tier services of MapBox to retrieve the map tiles via my account API token. Please create maps in moderation, or replace the token with a different one!
+
 To start with, let's import all the relevant packages we will need in this tutorial:
 
 ```bash
