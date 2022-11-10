@@ -38,6 +38,15 @@ project_dir``` must contain the path to the data (the data is currently not stor
 
 You can also try the interactive flask dashboard by running ```poetry run python dashboard/app.py``` (this will run the dashboard in debug mode) or ```flask run``` from the dashboard folder. As above, you need to set the path to where the data is stored in the ```app.py``` file variable ```project_dir```.
 
+# Useful links
+
+Train stations are referred to using a range of different systems in the data set. Other than the official station name, each station
+usually has a common name, a CRS code, an NLC code, and a TIPLOC code. A relatively comprehensive list of these systems is available [here](http://www.railwaycodes.org.uk/crs/crs0.shtm).
+
+Data on the location of train stations with coordinates is available, amongst other sources, as [part of the National  Public Transport Access Nodes (NaPTAN) data set] (https://www.data.gov.uk/dataset/ff93ffc1-6656-47d8-9155-85ea0b8f2251/national-public-transport-access-nodes-naptan).
+
+For developing and debugging, it can be useful to check the fares of specific journeys manually. A great resource to do this is the [BR FARES website](https://www.brfares.com) which gives access to all flows and fares between pairs of stations for all ticket types (select ``Expert Mode'' when querying).
+
 # Tutorial
 This is a brief tutorial on how to use this package. The tutorial is also avaiable as a separate script in ```tutorial.py```.
 
