@@ -82,7 +82,7 @@ for b in budget:
     
     reachable_hospitals = hospital_fares.groupby(['origin_crs'])['SiteName'].count().reset_index().rename({'SiteName': 'Count'}, axis = 1)
     
-    missing_stations = subset_od_list[~subset_od_list['origin_crs'].isin(reachable_hospitals['origin_crs'])]['origin_crs'].unique()
+    missing_stations = subset_od_list[(~subset_od_list['origin_crs'].isin(reachable_hospitals['origin_crs'])) & (~subset_od_list['origin_crs'].isin(closest_station_to_hospital_gdf['HospitalStationCRS']))]['origin_crs'].unique().tolist()   
     
     for crs in missing_stations:
         
