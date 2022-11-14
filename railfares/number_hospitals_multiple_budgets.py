@@ -82,6 +82,12 @@ for b in budget:
     
     reachable_hospitals = hospital_fares.groupby(['origin_crs'])['SiteName'].count().reset_index().rename({'SiteName': 'Count'}, axis = 1)
     
+    missing_stations = subset_od_list[~subset_od_list['origin_crs'].isin(reachable_hospitals['origin_crs'])]['origin_crs'].unique()
+    
+    for crs in missing_stations:
+        
+        reachable_hospitals = pd.concat([reachable_hospitals, pd.DataFrame([[crs, 0]], columns = ['origin_crs', 'Count'])])
+    
     
     for idx, row in reachable_hospitals.iterrows():
         
