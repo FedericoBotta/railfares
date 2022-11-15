@@ -13,6 +13,8 @@ naptan_gdf = data_parsing.get_naptan_data(project_dir)
 naptan_gdf = naptan_gdf.to_crs(epsg = 4326)
 station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
 station_gdf = station_gdf.to_crs(epsg = 4326)
+gb_boundary = gpd.read_file('http://geoportal1-ons.opendata.arcgis.com/datasets/f2c2211ff185418484566b2b7a5e1300_0.zip?outSR={%22latestWkid%22:27700,%22wkid%22:27700}')
+gb_boundary = gb_boundary.to_crs(epsg = 4326)
 
 app=Flask(__name__)
 @app.route('/', methods = ['GET', 'POST'])
@@ -215,7 +217,11 @@ def plot_hospital_metrics():
     stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
     stations.to_crs(epsg = 4326, inplace = True)
     
-    hospital_metrics = pd.read_csv(project_dir + 'number_hospitals_'+ request.form['budget_to_plot'] +'_pounds.csv').merge(stations[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
+    stations_gb_gdf = stations.sjoin(gb_boundary)
+    stations_england_gdf = stations_gb_gdf[stations_gb_gdf['ctry17nm'] == 'England'].copy().drop('index_right', axis = 1).dropna(axis = 0, subset = ['CRS Code'])
+
+    
+    hospital_metrics = pd.read_csv(project_dir + 'number_hospitals_'+ request.form['budget_to_plot'] +'_pounds.csv').merge(stations_england_gdf[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
     
     
     max_count = round(hospital_metrics[metric].max())
@@ -242,7 +248,7 @@ def plot_hospital_metrics():
     hospital_metrics['marker_colour'] = pd.cut(hospital_metrics[metric], bins = bins,
                                         labels =labels)
     
-    data_to_map = stations.merge(hospital_metrics, left_on = 'CRS Code', right_on = 'origin_crs', how = 'right')
+    data_to_map = stations_england_gdf.merge(hospital_metrics, left_on = 'CRS Code', right_on = 'origin_crs', how = 'right')
     
     data_to_map = data_to_map.to_crs(epsg = 4326)
     
