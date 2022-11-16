@@ -8,7 +8,7 @@ import branca.colormap as cm
 
 
 data = pd.read_excel('https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1039129/journey-time-statistics-2019-destination-datasets.ods',
-                     engine = 'odf', sheet_name = 'Large_employment_centres', skiprows = 1, header = 1)
+                     engine = 'odf', sheet_name = 'Medium_employment_centres', skiprows = 1, header = 1)
 
 points = gpd.points_from_xy(data['Easting'], data['Northing'], crs = 'OSGB36 / British National Grid')
  
@@ -78,5 +78,5 @@ for b in budget:
             
             reachable_employment_centres.at[idx, 'Count'] = reachable_employment_centres.at[idx, 'Count'] + 1
 
-    reachable_employment_centres.to_csv(project_dir + 'number_large_employment_centres_' + str(b) + '_pounds.csv')
+    reachable_employment_centres.to_csv(project_dir + 'number_medium_employment_centres_' + str(b) + '_pounds.csv')
 
