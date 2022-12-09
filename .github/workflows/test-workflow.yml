@@ -5,7 +5,7 @@ on: [push]
 jobs:
   test:
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
         #----------------------------------------------
       #       check-out repo and set-up python
