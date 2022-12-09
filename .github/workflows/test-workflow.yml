@@ -4,6 +4,9 @@ on: [push]
 
 jobs:
   test:
+    defaults:
+        run:
+          shell: bash
     runs-on: windows-latest
     timeout-minutes: 15
     steps:
