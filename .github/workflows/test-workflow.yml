@@ -4,10 +4,10 @@ on: [push]
 
 jobs:
   test:
-    defaults:
-        run:
-          shell: bash
-    runs-on: windows-latest
+    #defaults:
+       # run:
+       #   shell: bash
+    runs-on: macos-latest
     timeout-minutes: 15
     steps:
         #----------------------------------------------
