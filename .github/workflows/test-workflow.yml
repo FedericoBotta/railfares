@@ -1,4 +1,4 @@
-name: mac-os-test
+name: test-workflow
 
 on: [push]
 
