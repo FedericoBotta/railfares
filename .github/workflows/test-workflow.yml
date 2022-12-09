@@ -1,14 +1,11 @@
-name: test-workflow
+name: mac-os-test
 
 on: [push]
 
 jobs:
   test:
-    #defaults:
-       # run:
-       #   shell: bash
-    runs-on: macos-12
-    timeout-minutes: 15
+    runs-on: macos-11
+    timeout-minutes: 30
     steps:
         #----------------------------------------------
       #       check-out repo and set-up python
