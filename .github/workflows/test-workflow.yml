@@ -1,13 +1,10 @@
-name: test-workflow
+name: mac-os-test
 
 on: [push]
 
 jobs:
   test:
-    runs-on: ${{ matrix.os}}
-    strategy:
-      matrix:
-        os: [macos-11]
+    runs-on: macos-11
     timeout-minutes: 30
     steps:
         #----------------------------------------------
