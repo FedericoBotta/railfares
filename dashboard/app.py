@@ -14,7 +14,7 @@ naptan_gdf = naptan_gdf.to_crs(epsg = 4326)
 station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
 station_gdf = station_gdf.to_crs(epsg = 4326)
 # gb_boundary = gpd.read_file('http://geoportal1-ons.opendata.arcgis.com/datasets/f2c2211ff185418484566b2b7a5e1300_0.zip?outSR={%22latestWkid%22:27700,%22wkid%22:27700}')
-gb_boundary = gpd.read_file('https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Countries_Dec_2021_GB_BFC_2022/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json').dissolve()
+gb_boundary = gpd.read_file('https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Countries_Dec_2021_GB_BFC_2022/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json')
 gb_boundary = gb_boundary.to_crs(epsg = 4326)
 
 app=Flask(__name__)
@@ -219,7 +219,7 @@ def plot_hospital_metrics():
     stations.to_crs(epsg = 4326, inplace = True)
     
     stations_gb_gdf = stations.sjoin(gb_boundary)
-    stations_england_gdf = stations_gb_gdf[stations_gb_gdf['ctry17nm'] == 'England'].copy().drop('index_right', axis = 1).dropna(axis = 0, subset = ['CRS Code'])
+    stations_england_gdf = stations_gb_gdf[stations_gb_gdf['CTRY21NM'] == 'England'].copy().drop('index_right', axis = 1).dropna(axis = 0, subset = ['CRS Code'])
 
     
     hospital_metrics = pd.read_csv(project_dir + 'number_hospitals_'+ request.form['budget_to_plot'] +'_pounds.csv').merge(stations_england_gdf[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
