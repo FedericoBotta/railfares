@@ -83,7 +83,9 @@ def employment_metrics():
 @app.route('/cost_exclusion_index/', methods = ['GET', 'POST'])
 def cost_exclusion_index():
    
-   return render_template('cost_exclusion_index.html')
+   budgets = [10,25,50,75,100,125,150,175,200]
+   
+   return render_template('cost_exclusion_index.html', budgets = budgets)
 
 
 @app.route('/GetStationsGDF', methods = ['GET','POST'])
@@ -337,7 +339,8 @@ def plot_employment_metrics():
 def plot_ctrse():
     
     # naptan_gdf = naptan_gdf.to_crs(epsg = 27700)
-
+    
+    budget = request.form['budget']
 
     station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
     station_gdf = station_gdf.to_crs(epsg = 4326)
@@ -371,14 +374,33 @@ def plot_ctrse():
     stn_imd_gdf['ranked_imd'] = stn_imd_gdf['ranked_imd']/stn_imd_gdf['ranked_imd'].max()
     stn_imd_gdf['transformed_imd'] = -23 * np.log(1-stn_imd_gdf['ranked_imd']*(1-np.exp(-100/23)))
     
-    employment_metrics = pd.read_csv(project_dir + 'number_town_centres_50_pounds.csv').merge(stations[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
+    town_centres_metrics = pd.read_csv(project_dir + 'number_town_centres_' + str(budget) + '_pounds.csv').merge(stations[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
     
-    stn_imd_gdf = stn_imd_gdf.merge(employment_metrics)
-    stn_imd_gdf['ranked_count'] = stn_imd_gdf['Count'].rank()
-    stn_imd_gdf['ranked_count'] = stn_imd_gdf['ranked_count']/stn_imd_gdf['ranked_count'].max()
-    stn_imd_gdf['transformed_count'] = -23 * np.log(1-stn_imd_gdf['ranked_count']*(1-np.exp(-100/23)))
-
-    stn_imd_gdf['ctrse'] = stn_imd_gdf['transformed_fare'] + stn_imd_gdf['transformed_imd'] + stn_imd_gdf['transformed_count']
+    
+    town_centres_metrics['ranked_count'] = town_centres_metrics['Count'].rank(ascending = False)
+    town_centres_metrics['ranked_count'] = town_centres_metrics['ranked_count']/town_centres_metrics['ranked_count'].max()
+    town_centres_metrics['transformed_town_centres_count'] = -23 * np.log(1-town_centres_metrics['ranked_count']*(1-np.exp(-100/23)))
+    
+    stn_imd_gdf = stn_imd_gdf.merge(town_centres_metrics[['origin_crs', 'CRS Code', 'transformed_town_centres_count']])
+    
+    employment_centres_metrics = pd.read_csv(project_dir + 'number_large_employment_centres_' + str(budget) + '_pounds.csv').merge(stations[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
+    
+    employment_centres_metrics['ranked_count'] = employment_centres_metrics['Count'].rank(ascending = False)
+    employment_centres_metrics['ranked_count'] = employment_centres_metrics['ranked_count']/employment_centres_metrics['ranked_count'].max()
+    employment_centres_metrics['transformed_employment_centres_count'] = -23 * np.log(1-employment_centres_metrics['ranked_count']*(1-np.exp(-100/23)))
+    
+    stn_imd_gdf = stn_imd_gdf.merge(employment_centres_metrics[['origin_crs', 'CRS Code', 'transformed_employment_centres_count']])
+    
+    hospital_metrics = pd.read_csv(project_dir + 'number_hospitals_' + str(budget) + '_pounds.csv').merge(stations[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
+    
+    hospital_metrics['ranked_count'] = hospital_metrics['Count'].rank(ascending = False)
+    hospital_metrics['ranked_count'] = hospital_metrics['ranked_count']/hospital_metrics['ranked_count'].max()
+    hospital_metrics['transformed_hospitals_count'] = -23 * np.log(1-hospital_metrics['ranked_count']*(1-np.exp(-100/23)))
+    
+    stn_imd_gdf = stn_imd_gdf.merge(hospital_metrics[['origin_crs', 'CRS Code', 'transformed_hospitals_count']])
+    
+    
+    stn_imd_gdf['ctrse'] = stn_imd_gdf['transformed_fare'] + stn_imd_gdf['transformed_imd'] + stn_imd_gdf['transformed_town_centres_count'] + stn_imd_gdf['transformed_employment_centres_count'] + stn_imd_gdf['transformed_hospitals_count']
     
     
     max_count = round(stn_imd_gdf['ctrse'].max())
@@ -409,6 +431,8 @@ def plot_ctrse():
     
     
     print('python test')
+    
+    stn_imd_gdf['popupText'] = ['LSOA 2011 code: ' + row['LSOA11CD'] + ',<br> ' + 'CTRSE: '+ str(round(row['ctrse'])) for idx, row in stn_imd_gdf.iterrows()]
     
     return jsonify({'data': stn_imd_gdf.to_json()})
     
