@@ -366,6 +366,7 @@ def plot_ctrse():
     # stn_imd_gdf['mean_fare_dec'] = pd.qcut(stn_imd_gdf['fare'], 10, labels = False)
     # stn_imd_gdf['imd_dec'] = pd.qcut(stn_imd_gdf['Index of Multiple Deprivation (IMD) Score'], 10, labels = False)
 
+   
     stn_imd_gdf['ranked_fare'] = stn_imd_gdf['fare'].rank()
     stn_imd_gdf['ranked_fare'] = stn_imd_gdf['ranked_fare']/stn_imd_gdf['ranked_fare'].max()
     stn_imd_gdf['transformed_fare'] = -23 * np.log(1-stn_imd_gdf['ranked_fare']*(1-np.exp(-100/23)))
@@ -401,8 +402,7 @@ def plot_ctrse():
     
     
     stn_imd_gdf['ctrse'] = stn_imd_gdf['transformed_fare'] + stn_imd_gdf['transformed_imd'] + stn_imd_gdf['transformed_town_centres_count'] + stn_imd_gdf['transformed_employment_centres_count'] + stn_imd_gdf['transformed_hospitals_count']
-    
-    
+
     max_count = round(stn_imd_gdf['ctrse'].max())
     
     step = 10
@@ -429,8 +429,6 @@ def plot_ctrse():
     
     stn_imd_gdf = stn_imd_gdf.to_crs(epsg = 4326)
     
-    
-    print('python test')
     
     stn_imd_gdf['popupText'] = ['LSOA 2011 code: ' + row['LSOA11CD'] + ',<br> ' + 'CTRSE: '+ str(round(row['ctrse'])) for idx, row in stn_imd_gdf.iterrows()]
     
