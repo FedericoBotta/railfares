@@ -44,6 +44,12 @@
     {% endfor %}
 </select>
 <br><br>
+<select id="dropdown-maxdist" method="GET" action="/">
+    {% for dist in max_dist%}
+    <option value= "{{dist}}" DISTANCE>{{dist}}</option>"
+    {% endfor %}
+</select>
+<br><br>
 <button class = "plot-button" id="station-button">Retrieve and plot the data</button>
 </div>
 <div id="map" style= "width:95% "></div> 
@@ -71,10 +77,11 @@ function onEachFeature(feature, layer) {
 d3.select('#station-button')
     .on("click", function(){
     var budget_selected = d3.select("#dropdown-budget").node().value;
+    var max_dist_selected = d3.select("#dropdown-maxdist").node().value;
             
     jQuery.ajax({
          url: "/PlotCTRSE",
-         data: {"budget": budget_selected},
+         data: {"budget": budget_selected, "max_dist": max_dist_selected},
          type: 'POST',
          success: function(data){
          markersLayer.clearLayers();

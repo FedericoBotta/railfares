@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request,jsonify
 # import json
 import railfares.data_parsing as data_parsing
+import railfares.functionalities as functionalities
 import pandas as pd
 import geopandas as gpd
 from matplotlib.colors import rgb2hex
@@ -19,27 +20,31 @@ station_gdf = station_gdf.to_crs(epsg = 4326)
 # gb_boundary = gpd.read_file('http://geoportal1-ons.opendata.arcgis.com/datasets/f2c2211ff185418484566b2b7a5e1300_0.zip?outSR={%22latestWkid%22:27700,%22wkid%22:27700}')
 gb_boundary = gpd.read_file('https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Countries_Dec_2021_GB_BFC_2022/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json')
 gb_boundary = gb_boundary.to_crs(epsg = 4326)
-url = 'https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/LSOA_Dec_2011_Boundaries_Super_Generalised_Clipped_BSC_EW_V3_2022/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=false&returnIdsOnly=true&outSR=4326&f=json'
 
-response = urlopen(url)
-json_data = response.read().decode()
 
-id_list = json.loads(json_data)['objectIds']
+def create_colours(max_value, step):
+    
+        
+    bins = list(range(0, max_value + step, step))
+    n_bins = math.ceil(max_value / step)
 
-lsoa_gdf = gpd.GeoDataFrame()
 
-while id_list:
+    labels = []
+    colour_step = 240/n_bins
+
+    r = 240
+    g = 240
+    b= 240
+
+    for i in range(0, int(n_bins), 1):
+        
+        labels.append(rgb2hex([r/255, (g)/255, (b)/255]))
+        g = g - colour_step
+        b = b - colour_step
     
-    temp_id = id_list[0:250]
-    
-    temp_url = 'https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/LSOA_Dec_2011_Boundaries_Super_Generalised_Clipped_BSC_EW_V3_2022/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json&objectIds=' + ','.join(str(x) for x in temp_id)
-    
-    temp_gdf = gpd.read_file(temp_url)
-    
-    lsoa_gdf = gpd.GeoDataFrame(pd.concat([lsoa_gdf, temp_gdf]))
-    
-    id_list = [x for x in id_list if x not in temp_id]
-    
+    return bins, labels
+
+
 
 app=Flask(__name__)
 @app.route('/', methods = ['GET', 'POST'])
@@ -84,8 +89,9 @@ def employment_metrics():
 def cost_exclusion_index():
    
    budgets = [10,25,50,75,100,125,150,175,200]
+   max_dist = [5,10,15,25,50,100,200]
    
-   return render_template('cost_exclusion_index.html', budgets = budgets)
+   return render_template('cost_exclusion_index.html', budgets = budgets, max_dist = max_dist)
 
 
 @app.route('/GetStationsGDF', methods = ['GET','POST'])
@@ -114,22 +120,8 @@ def plot_cost():
 
     max_price = 300
     step = 10
-    bins = list(range(0, max_price + step, step))
-    n_bins = max_price / step
-
-
-    labels = []
-    colour_step = 240/n_bins
-
-    r = 240
-    g = 240
-    b= 240
-
-    for i in range(0, int(n_bins), 1):
-        
-        labels.append(rgb2hex([r/255, (g)/255, (b)/255]))
-        g = g - colour_step
-        b = b - colour_step
+    
+    bins, labels = create_colours(max_price, step)
         
     station_od['marker_colour'] = pd.cut(station_od['fare'], bins = bins,
                                         labels =labels)
@@ -196,23 +188,8 @@ def plot_stats_metrics():
         
         step = 5
         # step = round(max_distance/100)
-        
-    bins = list(range(0, max_distance + step, step))
-    n_bins = math.ceil(max_distance / step)
 
-
-    labels = []
-    colour_step = 240/n_bins
-
-    r = 240
-    g = 240
-    b= 240
-
-    for i in range(0, int(n_bins), 1):
-        
-        labels.append(rgb2hex([r/255, (g)/255, (b)/255]))
-        g = g - colour_step
-        b = b - colour_step
+    bins, labels = create_colours(max_distance, step)
         
     stats_metrics['marker_colour'] = pd.cut(stats_metrics[metric], bins = bins,
                                         labels =labels)
@@ -257,25 +234,10 @@ def plot_hospital_metrics():
     
     
     max_count = round(hospital_metrics[metric].max())
-    
     step = 5
-        
-    bins = list(range(0, max_count + step, step))
-    n_bins = math.ceil(max_count / step)
 
-
-    labels = []
-    colour_step = 240/n_bins
-
-    r = 240
-    g = 240
-    b= 240
-
-    for i in range(0, int(n_bins), 1):
-        
-        labels.append(rgb2hex([r/255, (g)/255, (b)/255]))
-        g = g - colour_step
-        b = b - colour_step
+    
+    bins, labels = create_colours(max_count, step)
         
     hospital_metrics['marker_colour'] = pd.cut(hospital_metrics[metric], bins = bins,
                                         labels =labels)
@@ -302,25 +264,10 @@ def plot_employment_metrics():
     
     
     max_count = round(employment_metrics[metric].max())
-    
     step = 5
-        
-    bins = list(range(0, max_count + step, step))
-    n_bins = math.ceil(max_count / step)
 
-
-    labels = []
-    colour_step = 240/n_bins
-
-    r = 240
-    g = 240
-    b= 240
-
-    for i in range(0, int(n_bins), 1):
-        
-        labels.append(rgb2hex([r/255, (g)/255, (b)/255]))
-        g = g - colour_step
-        b = b - colour_step
+    
+    bins, labels = create_colours(max_count, step)
         
     employment_metrics['marker_colour'] = pd.cut(employment_metrics[metric], bins = bins,
                                         labels =labels)
@@ -338,9 +285,10 @@ def plot_employment_metrics():
 @app.route('/PlotCTRSE', methods = ['GET', 'POST'])
 def plot_ctrse():
     
-    # naptan_gdf = naptan_gdf.to_crs(epsg = 27700)
-    
     budget = request.form['budget']
+    max_dist = int(request.form['max_dist'])
+    
+    max_dist = max_dist * 1000
 
     station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
     station_gdf = station_gdf.to_crs(epsg = 4326)
@@ -348,10 +296,23 @@ def plot_ctrse():
     stations = stations.to_crs(epsg = 4326)
 
 
-    reduced_od_list = od_list[od_list['origin_crs'].isin(stations['CRS Code'])]
+    stn_distances = pd.read_csv(project_dir + 'stations_pairwise_distances.csv')
 
-    mean_fares = stations.merge(reduced_od_list[['origin_crs', 'fare']].groupby('origin_crs').mean().reset_index(), right_on = 'origin_crs', left_on = 'CRS Code')
+    reduced_stn_distances = stn_distances[stn_distances['Distance'] <= max_dist]
+
+    od_list_max_dist = od_list.merge(reduced_stn_distances, left_on = ['origin_crs', 'destination_crs'], right_on = ['First CRS', 'Second CRS'])
+
+    station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
+    station_gdf = station_gdf.to_crs(epsg = 4326)
+    stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
+    stations = stations.to_crs(epsg = 4326)
+
+
+    reduced_od_list = od_list_max_dist[od_list_max_dist['origin_crs'].isin(stations['CRS Code'])]
     
+    mean_fares = stations.merge(reduced_od_list[['origin_crs', 'fare']].groupby('origin_crs').mean().reset_index(), right_on = 'origin_crs', left_on = 'CRS Code')
+
+
     lsoa_gdf.to_crs(epsg = 27700, inplace = True)
     mean_fares.to_crs(epsg = 27700, inplace = True)
 
@@ -405,26 +366,10 @@ def plot_ctrse():
     stn_imd_gdf['ctrse'] = stn_imd_gdf['transformed_fare'] + stn_imd_gdf['transformed_town_centres_count'] + stn_imd_gdf['transformed_employment_centres_count'] + stn_imd_gdf['transformed_hospitals_count']
 
     max_count = round(stn_imd_gdf['ctrse'].max())
-    
     step = 10
-        
-    bins = list(range(0, max_count + step, step))
-    n_bins = math.ceil(max_count / step)
 
-
-    labels = []
-    colour_step = 240/n_bins
-
-    r = 240
-    g = 240
-    b= 240
-
-    for i in range(0, int(n_bins), 1):
-        
-        labels.append(rgb2hex([r/255, (g)/255, (b)/255]))
-        g = g - colour_step
-        b = b - colour_step
-        
+    bins, labels = create_colours(max_count, step)
+    
     stn_imd_gdf['marker_colour'] = pd.cut(stn_imd_gdf['ctrse'], bins = bins,
                                         labels =labels)
     
@@ -435,16 +380,15 @@ def plot_ctrse():
     
     return jsonify({'data': stn_imd_gdf.to_json()})
     
-    
-    
-    
+
 
 if __name__ == '__main__':
-   app.run(host="localhost", port = 8080, debug=True)
+    
+    lsoa_gdf = functionalities.get_lsoa_boundaries()
+    app.run(host="localhost", port = 8080, debug=True)
 
 
 
 
 
 
-#jts.get_lsoa_boundaries()

@@ -53,6 +53,13 @@ while id_list:
 
 
 budget = 25
+max_dist = 50000
+
+stn_distances = pd.read_csv(project_dir + 'stations_pairwise_distances.csv')
+
+reduced_stn_distances = stn_distances[stn_distances['Distance'] <= max_dist]
+
+od_list_max_dist = od_list.merge(reduced_stn_distances, left_on = ['origin_crs', 'destination_crs'], right_on = ['First CRS', 'Second CRS'])
 
 station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
 station_gdf = station_gdf.to_crs(epsg = 4326)
@@ -60,7 +67,7 @@ stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', ri
 stations = stations.to_crs(epsg = 4326)
 
 
-reduced_od_list = od_list[od_list['origin_crs'].isin(stations['CRS Code'])]
+reduced_od_list = od_list_max_dist[od_list_max_dist['origin_crs'].isin(stations['CRS Code'])]
 
 mean_fares = stations.merge(reduced_od_list[['origin_crs', 'fare']].groupby('origin_crs').mean().reset_index(), right_on = 'origin_crs', left_on = 'CRS Code')
 
