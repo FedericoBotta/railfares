@@ -52,15 +52,22 @@ while id_list:
 
 
 
-# stations_lsoa_gdf = lsoa_gdf.sjoin(stations)
-# stations_lsoa_gdf = stations_lsoa_gdf.to_crs(epsg = 27700)
+budget = 25
+
+station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
+station_gdf = station_gdf.to_crs(epsg = 4326)
+stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
+stations = stations.to_crs(epsg = 4326)
 
 
 reduced_od_list = od_list[od_list['origin_crs'].isin(stations['CRS Code'])]
 
 mean_fares = stations.merge(reduced_od_list[['origin_crs', 'fare']].groupby('origin_crs').mean().reset_index(), right_on = 'origin_crs', left_on = 'CRS Code')
 
-lsoa_mean_fares = gpd.sjoin_nearest(lsoa_gdf, mean_fares, max_distance = 1000, distance_col = 'distance')
+lsoa_gdf.to_crs(epsg = 27700, inplace = True)
+mean_fares.to_crs(epsg = 27700, inplace = True)
+
+lsoa_mean_fares = gpd.sjoin_nearest(lsoa_gdf, mean_fares, max_distance = 5000, distance_col = 'distance')
 
 
 
@@ -68,8 +75,11 @@ imd_df = pd.read_excel('https://assets.publishing.service.gov.uk/government/uplo
 
 stn_imd_gdf = lsoa_mean_fares.merge(imd_df, left_on = 'LSOA11CD', right_on = 'LSOA code (2011)')
 
+stn_distances = pd.read_csv(project_dir + 'stations_pairwise_distances.csv')
+
 # stn_imd_gdf['mean_fare_dec'] = pd.qcut(stn_imd_gdf['fare'], 10, labels = False)
 # stn_imd_gdf['imd_dec'] = pd.qcut(stn_imd_gdf['Index of Multiple Deprivation (IMD) Score'], 10, labels = False)
+
 
 stn_imd_gdf['ranked_fare'] = stn_imd_gdf['fare'].rank()
 stn_imd_gdf['ranked_fare'] = stn_imd_gdf['ranked_fare']/stn_imd_gdf['ranked_fare'].max()
@@ -79,8 +89,34 @@ stn_imd_gdf['ranked_imd'] = stn_imd_gdf['Index of Multiple Deprivation (IMD) Sco
 stn_imd_gdf['ranked_imd'] = stn_imd_gdf['ranked_imd']/stn_imd_gdf['ranked_imd'].max()
 stn_imd_gdf['transformed_imd'] = -23 * np.log(1-stn_imd_gdf['ranked_imd']*(1-np.exp(-100/23)))
 
+town_centres_metrics = pd.read_csv(project_dir + 'number_town_centres_' + str(budget) + '_pounds.csv').merge(stations[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
 
-stn_imd_gdf['ctrse'] = stn_imd_gdf['transformed_fare'] + stn_imd_gdf['transformed_imd']
+
+town_centres_metrics['ranked_count'] = town_centres_metrics['Count'].rank(ascending = False)
+town_centres_metrics['ranked_count'] = town_centres_metrics['ranked_count']/town_centres_metrics['ranked_count'].max()
+town_centres_metrics['transformed_town_centres_count'] = -23 * np.log(1-town_centres_metrics['ranked_count']*(1-np.exp(-100/23)))
+
+stn_imd_gdf = stn_imd_gdf.merge(town_centres_metrics[['origin_crs', 'CRS Code', 'transformed_town_centres_count']])
+
+employment_centres_metrics = pd.read_csv(project_dir + 'number_large_employment_centres_' + str(budget) + '_pounds.csv').merge(stations[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
+
+employment_centres_metrics['ranked_count'] = employment_centres_metrics['Count'].rank(ascending = False)
+employment_centres_metrics['ranked_count'] = employment_centres_metrics['ranked_count']/employment_centres_metrics['ranked_count'].max()
+employment_centres_metrics['transformed_employment_centres_count'] = -23 * np.log(1-employment_centres_metrics['ranked_count']*(1-np.exp(-100/23)))
+
+stn_imd_gdf = stn_imd_gdf.merge(employment_centres_metrics[['origin_crs', 'CRS Code', 'transformed_employment_centres_count']])
+
+hospital_metrics = pd.read_csv(project_dir + 'number_hospitals_' + str(budget) + '_pounds.csv').merge(stations[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
+
+hospital_metrics['ranked_count'] = hospital_metrics['Count'].rank(ascending = False)
+hospital_metrics['ranked_count'] = hospital_metrics['ranked_count']/hospital_metrics['ranked_count'].max()
+hospital_metrics['transformed_hospitals_count'] = -23 * np.log(1-hospital_metrics['ranked_count']*(1-np.exp(-100/23)))
+
+stn_imd_gdf = stn_imd_gdf.merge(hospital_metrics[['origin_crs', 'CRS Code', 'transformed_hospitals_count']])
+
+
+# stn_imd_gdf['ctrse'] = stn_imd_gdf['transformed_fare'] + stn_imd_gdf['transformed_imd'] + stn_imd_gdf['transformed_town_centres_count'] + stn_imd_gdf['transformed_employment_centres_count'] + stn_imd_gdf['transformed_hospitals_count']
+stn_imd_gdf['ctrse'] = stn_imd_gdf['transformed_fare'] + stn_imd_gdf['transformed_town_centres_count'] + stn_imd_gdf['transformed_employment_centres_count'] + stn_imd_gdf['transformed_hospitals_count']
 
 
 stn_imd_gdf.plot(column = 'ctrse', legend = True)
