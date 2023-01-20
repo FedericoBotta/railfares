@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from scipy.stats import kendalltau as kendall
 from urllib.request import urlopen
 import json
+import math
+from matplotlib.colors import rgb2hex
 import numpy as np
 
 def get_lsoa_boundaries():
@@ -106,3 +108,25 @@ def calculate_ctrse_index(project_dir, naptan_gdf, max_dist, od_list, lsoa_gdf, 
     stn_imd_gdf['ctrse'] = stn_imd_gdf['transformed_fare'] + stn_imd_gdf['transformed_town_centres_count'] + stn_imd_gdf['transformed_employment_centres_count'] + stn_imd_gdf['transformed_hospitals_count']
     
     return stn_imd_gdf
+
+def create_colours(max_value, step):
+    
+        
+    bins = list(range(0, max_value + step, step))
+    n_bins = math.ceil(max_value / step)
+
+
+    labels = []
+    colour_step = 240/n_bins
+
+    r = 240
+    g = 240
+    b= 240
+
+    for i in range(0, int(n_bins), 1):
+        
+        labels.append(rgb2hex([r/255, (g)/255, (b)/255]))
+        g = g - colour_step
+        b = b - colour_step
+    
+    return bins, labels

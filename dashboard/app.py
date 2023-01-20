@@ -4,46 +4,11 @@ import railfares.data_parsing as data_parsing
 import railfares.functionalities as functionalities
 import pandas as pd
 import geopandas as gpd
-from matplotlib.colors import rgb2hex
+
 import math
 from urllib.request import urlopen
 import numpy as np
 import json
-
-
-project_dir = '/Users/fb394/Documents/GitHub/railfares/'
-od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix.csv', low_memory = False)
-naptan_gdf = data_parsing.get_naptan_data(project_dir)
-naptan_gdf = naptan_gdf.to_crs(epsg = 4326)
-station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
-station_gdf = station_gdf.to_crs(epsg = 4326)
-# gb_boundary = gpd.read_file('http://geoportal1-ons.opendata.arcgis.com/datasets/f2c2211ff185418484566b2b7a5e1300_0.zip?outSR={%22latestWkid%22:27700,%22wkid%22:27700}')
-gb_boundary = gpd.read_file('https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Countries_Dec_2021_GB_BFC_2022/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json')
-gb_boundary = gb_boundary.to_crs(epsg = 4326)
-
-
-def create_colours(max_value, step):
-    
-        
-    bins = list(range(0, max_value + step, step))
-    n_bins = math.ceil(max_value / step)
-
-
-    labels = []
-    colour_step = 240/n_bins
-
-    r = 240
-    g = 240
-    b= 240
-
-    for i in range(0, int(n_bins), 1):
-        
-        labels.append(rgb2hex([r/255, (g)/255, (b)/255]))
-        g = g - colour_step
-        b = b - colour_step
-    
-    return bins, labels
-
 
 
 app=Flask(__name__)
@@ -94,21 +59,6 @@ def cost_exclusion_index():
    return render_template('cost_exclusion_index.html', budgets = budgets, max_dist = max_dist)
 
 
-@app.route('/GetStationsGDF', methods = ['GET','POST'])
-def get_stations_gdf():
-    print('hello from app.py')
-    
-    stations_gdf = data_parsing.get_naptan_data(project_dir)
-    stations_gdf.to_crs(epsg = '4326', inplace = True)
-    stations_gdf['col'] = '#ff7800'
-    stations_gdf['col'].iloc[0:1000] = '#0000F0'
-    # print(stations_gdf.crs)
-    # if request.method == 'POST':
-        
-    return jsonify({'data': stations_gdf.to_json()})
-    # return jsonify({'data': jts_df.to_json()})
-    #return jsonify({'data': stations_gdf.geometry})
-
 @app.route('/PlotCost', methods = ['GET', 'POST'])
 def plot_cost():
     
@@ -121,7 +71,7 @@ def plot_cost():
     max_price = 300
     step = 10
     
-    bins, labels = create_colours(max_price, step)
+    bins, labels = functionalities.create_colours(max_price, step)
         
     station_od['marker_colour'] = pd.cut(station_od['fare'], bins = bins,
                                         labels =labels)
@@ -143,7 +93,7 @@ def plot_stats_metrics():
     
     metric = request.form['metric_to_plot']
     
-    stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
+    # stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
     
     la_file = gpd.read_file(project_dir + 'Local_Authority_Districts_(May_2021)_UK_BFE/LAD_MAY_2021_UK_BFE_V2.shp')
     la_file = la_file.to_crs(epsg = 4326)
@@ -164,7 +114,7 @@ def plot_stats_metrics():
     stats_metrics['Median distance'] = stats_metrics['Median distance']/1000
     stats_metrics['Max distance'] = stats_metrics['Max distance']/1000
     stats_metrics['Metric'] = stats_metrics['Number'] * stats_metrics['Median distance']/len(station_gdf['Station name'].unique())
-    stats_metrics['Population Metric'] = stats_metrics['Median distance']/(stats_metrics['Population density'])*100
+    stats_metrics['Population Metric'] = stats_metrics['Number']/(stats_metrics['Population density'])*100
     stats_metrics['Reachable Population'] = stats_metrics['Reachable Population']/stats_metrics['Reachable Population'].max()*100
     # stats_metrics['Metric'] = stats_metrics['Median distance'] / stats_metrics['Number']*100
     stats_metrics['Number'] = stats_metrics['Number']/len(station_gdf['Station name'].unique())*100
@@ -189,7 +139,7 @@ def plot_stats_metrics():
         step = 5
         # step = round(max_distance/100)
 
-    bins, labels = create_colours(max_distance, step)
+    bins, labels = functionalities.create_colours(max_distance, step)
         
     stats_metrics['marker_colour'] = pd.cut(stats_metrics[metric], bins = bins,
                                         labels =labels)
@@ -223,8 +173,8 @@ def plot_hospital_metrics():
     
     metric = request.form['metric_to_plot']
     
-    stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
-    stations.to_crs(epsg = 4326, inplace = True)
+    # stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
+    # stations.to_crs(epsg = 4326, inplace = True)
     
     stations_gb_gdf = stations.sjoin(gb_boundary)
     stations_england_gdf = stations_gb_gdf[stations_gb_gdf['CTRY21NM'] == 'England'].copy().drop('index_right', axis = 1).dropna(axis = 0, subset = ['CRS Code'])
@@ -237,7 +187,7 @@ def plot_hospital_metrics():
     step = 5
 
     
-    bins, labels = create_colours(max_count, step)
+    bins, labels = functionalities.create_colours(max_count, step)
         
     hospital_metrics['marker_colour'] = pd.cut(hospital_metrics[metric], bins = bins,
                                         labels =labels)
@@ -257,8 +207,7 @@ def plot_employment_metrics():
     
     metric = request.form['metric_to_plot']
     
-    stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
-    stations.to_crs(epsg = 4326, inplace = True)
+   
     
     employment_metrics = pd.read_csv(project_dir + 'number_large_employment_centres_'+ request.form['budget_to_plot'] +'_pounds.csv').merge(stations[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
     
@@ -267,7 +216,7 @@ def plot_employment_metrics():
     step = 5
 
     
-    bins, labels = create_colours(max_count, step)
+    bins, labels = functionalities.create_colours(max_count, step)
         
     employment_metrics['marker_colour'] = pd.cut(employment_metrics[metric], bins = bins,
                                         labels =labels)
@@ -289,86 +238,13 @@ def plot_ctrse():
     max_dist = int(request.form['max_dist'])
     
     max_dist = max_dist * 1000
-
-    station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
-    station_gdf = station_gdf.to_crs(epsg = 4326)
-    stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
-    stations = stations.to_crs(epsg = 4326)
-
-
-    stn_distances = pd.read_csv(project_dir + 'stations_pairwise_distances.csv')
-
-    reduced_stn_distances = stn_distances[stn_distances['Distance'] <= max_dist]
-
-    od_list_max_dist = od_list.merge(reduced_stn_distances, left_on = ['origin_crs', 'destination_crs'], right_on = ['First CRS', 'Second CRS'])
-
-    station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
-    station_gdf = station_gdf.to_crs(epsg = 4326)
-    stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
-    stations = stations.to_crs(epsg = 4326)
-
-
-    reduced_od_list = od_list_max_dist[od_list_max_dist['origin_crs'].isin(stations['CRS Code'])]
     
-    mean_fares = stations.merge(reduced_od_list[['origin_crs', 'fare']].groupby('origin_crs').mean().reset_index(), right_on = 'origin_crs', left_on = 'CRS Code')
-
-
-    lsoa_gdf.to_crs(epsg = 27700, inplace = True)
-    mean_fares.to_crs(epsg = 27700, inplace = True)
-
-    lsoa_mean_fares = gpd.sjoin_nearest(lsoa_gdf, mean_fares, max_distance = 5000, distance_col = 'distance')
-
-
-
-    imd_df = pd.read_excel('https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/833978/File_5_-_IoD2019_Scores.xlsx', sheet_name = 'IoD2019 Scores')
-
-    stn_imd_gdf = lsoa_mean_fares.merge(imd_df, left_on = 'LSOA11CD', right_on = 'LSOA code (2011)')
-
-    # stn_imd_gdf['mean_fare_dec'] = pd.qcut(stn_imd_gdf['fare'], 10, labels = False)
-    # stn_imd_gdf['imd_dec'] = pd.qcut(stn_imd_gdf['Index of Multiple Deprivation (IMD) Score'], 10, labels = False)
-
-   
-    stn_imd_gdf['ranked_fare'] = stn_imd_gdf['fare'].rank()
-    stn_imd_gdf['ranked_fare'] = stn_imd_gdf['ranked_fare']/stn_imd_gdf['ranked_fare'].max()
-    stn_imd_gdf['transformed_fare'] = -23 * np.log(1-stn_imd_gdf['ranked_fare']*(1-np.exp(-100/23)))
-
-    stn_imd_gdf['ranked_imd'] = stn_imd_gdf['Index of Multiple Deprivation (IMD) Score'].rank()
-    stn_imd_gdf['ranked_imd'] = stn_imd_gdf['ranked_imd']/stn_imd_gdf['ranked_imd'].max()
-    stn_imd_gdf['transformed_imd'] = -23 * np.log(1-stn_imd_gdf['ranked_imd']*(1-np.exp(-100/23)))
-    
-    town_centres_metrics = pd.read_csv(project_dir + 'number_town_centres_' + str(budget) + '_pounds.csv').merge(stations[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
-    
-    
-    town_centres_metrics['ranked_count'] = town_centres_metrics['Count'].rank(ascending = False)
-    town_centres_metrics['ranked_count'] = town_centres_metrics['ranked_count']/town_centres_metrics['ranked_count'].max()
-    town_centres_metrics['transformed_town_centres_count'] = -23 * np.log(1-town_centres_metrics['ranked_count']*(1-np.exp(-100/23)))
-    
-    stn_imd_gdf = stn_imd_gdf.merge(town_centres_metrics[['origin_crs', 'CRS Code', 'transformed_town_centres_count']])
-    
-    employment_centres_metrics = pd.read_csv(project_dir + 'number_large_employment_centres_' + str(budget) + '_pounds.csv').merge(stations[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
-    
-    employment_centres_metrics['ranked_count'] = employment_centres_metrics['Count'].rank(ascending = False)
-    employment_centres_metrics['ranked_count'] = employment_centres_metrics['ranked_count']/employment_centres_metrics['ranked_count'].max()
-    employment_centres_metrics['transformed_employment_centres_count'] = -23 * np.log(1-employment_centres_metrics['ranked_count']*(1-np.exp(-100/23)))
-    
-    stn_imd_gdf = stn_imd_gdf.merge(employment_centres_metrics[['origin_crs', 'CRS Code', 'transformed_employment_centres_count']])
-    
-    hospital_metrics = pd.read_csv(project_dir + 'number_hospitals_' + str(budget) + '_pounds.csv').merge(stations[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
-    
-    hospital_metrics['ranked_count'] = hospital_metrics['Count'].rank(ascending = False)
-    hospital_metrics['ranked_count'] = hospital_metrics['ranked_count']/hospital_metrics['ranked_count'].max()
-    hospital_metrics['transformed_hospitals_count'] = -23 * np.log(1-hospital_metrics['ranked_count']*(1-np.exp(-100/23)))
-    
-    stn_imd_gdf = stn_imd_gdf.merge(hospital_metrics[['origin_crs', 'CRS Code', 'transformed_hospitals_count']])
-    
-    
-    # stn_imd_gdf['ctrse'] = stn_imd_gdf['transformed_fare'] + stn_imd_gdf['transformed_imd'] + stn_imd_gdf['transformed_town_centres_count'] + stn_imd_gdf['transformed_employment_centres_count'] + stn_imd_gdf['transformed_hospitals_count']
-    stn_imd_gdf['ctrse'] = stn_imd_gdf['transformed_fare'] + stn_imd_gdf['transformed_town_centres_count'] + stn_imd_gdf['transformed_employment_centres_count'] + stn_imd_gdf['transformed_hospitals_count']
+    stn_imd_gdf = functionalities.calculate_ctrse_index(project_dir, naptan_gdf, max_dist, od_list, lsoa_gdf, budget)
 
     max_count = round(stn_imd_gdf['ctrse'].max())
     step = 10
 
-    bins, labels = create_colours(max_count, step)
+    bins, labels = functionalities.create_colours(max_count, step)
     
     stn_imd_gdf['marker_colour'] = pd.cut(stn_imd_gdf['ctrse'], bins = bins,
                                         labels =labels)
@@ -384,7 +260,21 @@ def plot_ctrse():
 
 if __name__ == '__main__':
     
+    project_dir = '/Users/fb394/Documents/GitHub/railfares/'
+    od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix.csv', low_memory = False)
+    naptan_gdf = data_parsing.get_naptan_data(project_dir)
+    naptan_gdf = naptan_gdf.to_crs(epsg = 4326)
+    station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
+    station_gdf = station_gdf.to_crs(epsg = 4326)
+    # gb_boundary = gpd.read_file('http://geoportal1-ons.opendata.arcgis.com/datasets/f2c2211ff185418484566b2b7a5e1300_0.zip?outSR={%22latestWkid%22:27700,%22wkid%22:27700}')
+    gb_boundary = gpd.read_file('https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Countries_Dec_2021_GB_BFC_2022/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json')
+    gb_boundary = gb_boundary.to_crs(epsg = 4326)
+
     lsoa_gdf = functionalities.get_lsoa_boundaries()
+    
+    stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
+    stations.to_crs(epsg = 4326, inplace = True)
+    
     app.run(host="localhost", port = 8080, debug=True)
 
 
