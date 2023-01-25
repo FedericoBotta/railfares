@@ -34,7 +34,7 @@ def get_lsoa_boundaries():
         
     return lsoa_gdf
 
-def calculate_ctrse_index(project_dir, naptan_gdf, max_dist, od_list, lsoa_gdf, budget):
+def calculate_ctrse_index(project_dir, naptan_gdf, max_dist, od_list, lsoa_gdf, budget, imd_flag):
     
     station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
     station_gdf = station_gdf.to_crs(epsg = 4326)
@@ -103,9 +103,13 @@ def calculate_ctrse_index(project_dir, naptan_gdf, max_dist, od_list, lsoa_gdf, 
     
     stn_imd_gdf = stn_imd_gdf.merge(hospital_metrics[['origin_crs', 'CRS Code', 'transformed_hospitals_count']])
     
-    
-    # stn_imd_gdf['ctrse'] = stn_imd_gdf['transformed_fare'] + stn_imd_gdf['transformed_imd'] + stn_imd_gdf['transformed_town_centres_count'] + stn_imd_gdf['transformed_employment_centres_count'] + stn_imd_gdf['transformed_hospitals_count']
-    stn_imd_gdf['ctrse'] = stn_imd_gdf['transformed_fare'] + stn_imd_gdf['transformed_town_centres_count'] + stn_imd_gdf['transformed_employment_centres_count'] + stn_imd_gdf['transformed_hospitals_count']
+    if imd_flag:
+        
+        stn_imd_gdf['ctrse'] = stn_imd_gdf['transformed_fare'] + stn_imd_gdf['transformed_imd'] + stn_imd_gdf['transformed_town_centres_count'] + stn_imd_gdf['transformed_employment_centres_count'] + stn_imd_gdf['transformed_hospitals_count']
+        
+    else:
+        
+        stn_imd_gdf['ctrse'] = stn_imd_gdf['transformed_fare'] + stn_imd_gdf['transformed_town_centres_count'] + stn_imd_gdf['transformed_employment_centres_count'] + stn_imd_gdf['transformed_hospitals_count']
     
     return stn_imd_gdf
 

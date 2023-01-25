@@ -236,10 +236,11 @@ def plot_ctrse():
     
     budget = request.form['budget']
     max_dist = int(request.form['max_dist'])
+    imd_flag = request.form['include_imd']
     
     max_dist = max_dist * 1000
     
-    stn_imd_gdf = functionalities.calculate_ctrse_index(project_dir, naptan_gdf, max_dist, od_list, lsoa_gdf, budget)
+    stn_imd_gdf = functionalities.calculate_ctrse_index(project_dir, naptan_gdf, max_dist, od_list, lsoa_gdf, budget, imd_flag)
 
     max_count = round(stn_imd_gdf['ctrse'].max())
     step = 10
@@ -251,7 +252,7 @@ def plot_ctrse():
     
     stn_imd_gdf = stn_imd_gdf.to_crs(epsg = 4326)
     
-    
+    print(imd_flag)
     stn_imd_gdf['popupText'] = ['LSOA 2011 code: ' + row['LSOA11CD'] + ',<br> ' + 'CTRSE: '+ str(round(row['ctrse'])) for idx, row in stn_imd_gdf.iterrows()]
     
     return jsonify({'data': stn_imd_gdf.to_json()})

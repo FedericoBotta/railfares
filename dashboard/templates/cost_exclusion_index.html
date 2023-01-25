@@ -33,22 +33,28 @@
 <button class = "main-button" type="button" onclick="location.href= {{ url_for('station_metrics') }}">Station accessibility</button>
 <button class = "main-button" type="button" onclick="location.href= {{ url_for('hospital_metrics') }}">Hospital accessibility</button>
 <button class = "main-button" type="button" onclick="location.href= {{ url_for('employment_metrics') }}">Employment accessibility</button>
-<button class = "main-button" type="button" onclick="location.href= {{ url_for('cost_exclusion_index') }}" disabled>Cost exclusion index</button>
+<button class = "main-button" type="button" onclick="location.href= {{ url_for('cost_exclusion_index') }}" disabled>Cost accessibility index</button>
 <hr class = "main-sep-line">
 
 <p style = "font-size: 24px" "font-family: MyriadPro"> Experimental index combining cost of rail journeys, index of multiple deprivation, and accessibility (by cost) of selected destinations. 
 <br><br>
+Max budget:
 <select id="dropdown-budget" method="GET" action="/">
     {% for budget in budgets%}
     <option value= "{{budget}}" BUDGET>{{budget}}</option>"
     {% endfor %}
 </select>
 <br><br>
+Max distance
 <select id="dropdown-maxdist" method="GET" action="/">
     {% for dist in max_dist%}
     <option value= "{{dist}}" DISTANCE>{{dist}}</option>"
     {% endfor %}
 </select>
+<br><br>
+<label for="imd">
+   <input type="checkbox" id="imd" name="imd" value="yes"> Include IMD in index
+</label>
 <br><br>
 <button class = "plot-button" id="station-button">Retrieve and plot the data</button>
 </div>
@@ -78,10 +84,9 @@ d3.select('#station-button')
     .on("click", function(){
     var budget_selected = d3.select("#dropdown-budget").node().value;
     var max_dist_selected = d3.select("#dropdown-maxdist").node().value;
-            
     jQuery.ajax({
          url: "/PlotCTRSE",
-         data: {"budget": budget_selected, "max_dist": max_dist_selected},
+         data: {"budget": budget_selected, "max_dist": max_dist_selected, "include_imd": document.querySelector('#imd').checked},
          type: 'POST',
          success: function(data){
          markersLayer.clearLayers();
