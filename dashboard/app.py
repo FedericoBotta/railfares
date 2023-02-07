@@ -22,10 +22,20 @@ def root():
    
    return render_template('index.html', list_stations = list_stations)
 
+@app.route('/isocost/', methods = ['GET', 'POST'])
+def isocost():
+    
+    station_gdf = data_parsing.get_station_location(project_dir)
+     
+    list_stations = station_gdf['Station name'].unique().tolist()
+    
+    return render_template('isocost.html', list_stations = list_stations)
+
 @app.route('/station_metrics/', methods = ['GET', 'POST'])
 def station_metrics():
     
-   metrics = ['Number of stations', 'Max distance', 'Mean distance', 'Median distance', 'Metric', 'Population Metric', 'Reachable Population']
+   # metrics = ['Number of stations', 'Max distance', 'Mean distance', 'Median distance', 'Metric', 'Population Metric', 'Reachable Population']
+   metrics = ['Metric', 'Number of stations', 'Max distance', 'Mean distance', 'Median distance']
    
    budgets = [10,25,50,75,100,125,150,175,200]
    
@@ -87,6 +97,37 @@ def plot_cost():
     od_list_min = station_od_gdf.loc[station_od_gdf.groupby(['Destination station name'])['fare'].idxmin()]
     
     return jsonify({'data': od_list_min.to_json()})
+
+@app.route('/PlotIsoCost', methods = ['GET', 'POST'])
+def plot_iso_cost():
+    
+    starting_station = request.form['starting_station']
+    budget = int(request.form['max_budget'])
+    
+    # starting_station_crs = data_parsing.get_station_code_from_name(starting_station, project_dir)['CRS Code']
+    
+    isocost = data_parsing.get_isocost_stations(starting_station, budget, project_dir)
+    
+    max_price = budget
+    step = 2
+    
+    bins, labels = functionalities.create_colours(max_price, step)
+        
+    isocost['marker_colour'] = pd.cut(isocost['fare'], bins = bins,
+                                        labels =labels)
+
+    isocost['Station name'] = isocost['Station name'].str.rstrip()
+    isocost['popupText'] = ['Starting station: ' + starting_station + ',<br> Destination station: ' + row['Station name'] + ',<br> Fare: £' + str(row['fare']).ljust(4,'0') for idx, row in isocost.iterrows()]
+    
+    stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'}))
+
+
+    station_od_gdf = stations.merge(isocost[['Station name', 'CRS Code', 'fare', 'marker_colour','popupText']], left_on = 'CRS Code', right_on = 'CRS Code')
+    
+    od_list_min = station_od_gdf.loc[station_od_gdf.groupby(['CRS Code'])['fare'].idxmin()]
+    
+    return jsonify({'data': od_list_min.to_json()})
+    
 
 @app.route('/PlotStatsMetrics', methods = ['GET', 'POST'])
 def plot_stats_metrics():
@@ -211,7 +252,7 @@ def plot_employment_metrics():
     stations_england_gdf = stations_gb_gdf[stations_gb_gdf['CTRY21NM'] == 'England'].copy().drop('index_right', axis = 1).dropna(axis = 0, subset = ['CRS Code'])
 
     
-    employment_metrics = pd.read_csv(project_dir + 'number_large_employment_centres_'+ request.form['budget_to_plot'] +'_pounds.csv').merge(stations[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
+    employment_metrics = pd.read_csv(project_dir + 'number_large_employment_centres_'+ request.form['budget_to_plot'] +'_pounds.csv').merge(stations_england_gdf[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
     
     
     max_count = round(employment_metrics[metric].max())
@@ -224,6 +265,7 @@ def plot_employment_metrics():
                                         labels =labels)
     
     data_to_map = stations_england_gdf.merge(employment_metrics, left_on = 'CRS Code', right_on = 'origin_crs', how = 'right').dropna(axis = 0, subset = 'CommonName')
+
     
     data_to_map = data_to_map.to_crs(epsg = 4326)
     

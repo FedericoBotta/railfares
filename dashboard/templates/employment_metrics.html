@@ -30,6 +30,7 @@
 -->
 <div>
 <button class = "main-button" type="button" onclick="location.href= '/'" >Cost from station</button>
+<button class = "main-button" type="button" onclick="location.href= {{ url_for('isocost') }}">Isocosts</button>
 <button class = "main-button" type="button" onclick="location.href= {{ url_for('station_metrics') }}">Station accessibility</button>
 <button class = "main-button" type="button" onclick="location.href= {{ url_for('hospital_metrics') }}">Hospital accessibility</button>
 <button class = "main-button" type="button" onclick="location.href= {{ url_for('employment_metrics') }}" disabled>Employment accessibility</button>
