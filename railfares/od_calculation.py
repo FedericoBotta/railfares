@@ -264,6 +264,6 @@ for key, value in stations_nlc_dict.items():
     progr = progr + 1
 
 # od_list_min = od_list.loc[od_list.groupby(['Destination station name', 'Origin station name'])['fare'].idxmin()]
-od_list.to_csv(project_dir + 'od_minimum_cost_matrix.csv')
+od_list.to_csv(project_dir + 'od_minimum_cost_matrix_updated.csv')
 
 

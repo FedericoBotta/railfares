@@ -207,7 +207,9 @@ def plot_employment_metrics():
     
     metric = request.form['metric_to_plot']
     
-   
+    stations_gb_gdf = stations.sjoin(gb_boundary)
+    stations_england_gdf = stations_gb_gdf[stations_gb_gdf['CTRY21NM'] == 'England'].copy().drop('index_right', axis = 1).dropna(axis = 0, subset = ['CRS Code'])
+
     
     employment_metrics = pd.read_csv(project_dir + 'number_large_employment_centres_'+ request.form['budget_to_plot'] +'_pounds.csv').merge(stations[['CRS Code']], left_on = 'origin_crs', right_on = 'CRS Code')
     
@@ -221,7 +223,7 @@ def plot_employment_metrics():
     employment_metrics['marker_colour'] = pd.cut(employment_metrics[metric], bins = bins,
                                         labels =labels)
     
-    data_to_map = stations.merge(employment_metrics, left_on = 'CRS Code', right_on = 'origin_crs', how = 'right')
+    data_to_map = stations_england_gdf.merge(employment_metrics, left_on = 'CRS Code', right_on = 'origin_crs', how = 'right').dropna(axis = 0, subset = 'CommonName')
     
     data_to_map = data_to_map.to_crs(epsg = 4326)
     
