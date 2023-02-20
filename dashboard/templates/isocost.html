@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Flask Leaflet Website</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/universal.css') }}" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+  crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+  integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+  crossorigin=""></script>
+<script src="static/js/leaflet-providers.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+
+</head>
+
+<body>
+<!--
+<ul class="menu">
+            <li><a href="/">Home</a></li>
+            <li><a href="{{ url_for('station_metrics') }}">Station metrics</a></li>
+            <li><a href="{{ url_for('hospital_metrics') }}">Hospital metrics</a></li>
+            <li><a href="{{ url_for('employment_metrics') }}">Employment metrics</a></li>
+          </ul>
+-->
+<div>
+<button class = "main-button" type="button" onclick="location.href= '/'">Cost from station</button>
+<button class = "main-button" type="button" onclick="location.href= {{ url_for('isocost') }}" disabled>Isocosts</button>
+<button class = "main-button" type="button" onclick="location.href= {{ url_for('station_metrics') }}">Station accessibility</button>
+<button class = "main-button" type="button" onclick="location.href= {{ url_for('hospital_metrics') }}">Hospital accessibility</button>
+<button class = "main-button" type="button" onclick="location.href= {{ url_for('employment_metrics') }}">Employment accessibility</button>
+<button class = "main-button" type="button" onclick="location.href= {{ url_for('cost_exclusion_index') }}">Cost accessibility index</button>
+<hr class = "main-sep-line">
+<p style = "font-size: 24px" "font-family: MyriadPro"> Here, you can see the cheapest fare to reach any train station in Great Britain from any starting station you select. The analysis assumes that you are using a single any-time ticket, and fares are accurate as of February 2022.
+Note that the cheapest fare displayed here typically does not correspond to the fastest or more efficient train journey, and this is particularly true for long journeys.
+<br><br>
+<!--
+Select a starting station 
+<select id="dropdown" method="GET" action="/" data-dropup-auto="false">
+    {% for stats in list_stations %}
+    <option value= "{{stats}}" SELECTED>{{stats}}</option>"
+    {% endfor %}
+   <<option disabled selected value style="display:none"></option>
+</select>
+-->
+<form id = "dropdown" action="">
+        <label style = "font-size: 24px" "font-family: MyriadPro">Pick a starting station: </label>
+        <input list="stations" id = "stationlist">
+        <datalist id="stations">
+             {% for stats in list_stations %}
+             <option value= "{{stats}}" SELECTED>{{stats}}</option>"
+             {% endfor %}
+            <<option disabled selected value style="display:none"></option>
+         </select>
+        </datalist>
+    </form>
+
+
+</p>
+
+<br><br>
+<label style = "font-size: 24px" "font-family: MyriadPro">Input a maximum budget (in £): </label>
+<input type="text" id="budget"  required
+       minlength="1" maxlength="8" size="10">
+<br><br>
+
+<button class = "plot-button" id="station-button">Retrieve and plot the data</button>
+<br><br>
+</div>
+<div id="map" style= "width:95% "></div> 
+
+
+<script>
+
+var map = L.map('map').setView([52, 0], 7);
+L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZmVkZWJvdHRhIiwiYSI6ImNsNnZzZmx1bDA0aXozYnA5NHNxc2oxYm4ifQ.NH-kHQqlCLP3OVnx5ygJlQ', {
+attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+preferCanvas: true
+}).addTo(map); 
+
+
+var geojsonMarkerOptions = {
+    radius: 8,
+    color: "#000",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8
+};
+
+var markersLayer = new L.LayerGroup();
+
+function onEachFeature(feature, layer) {
+    if (feature.properties && feature.properties.popupText) {
+        layer.bindPopup(feature.properties.popupText);
+    }
+};
+
+d3.select('#station-button')
+    .on("click", function(){
+    
+    var selected = stationlist.value;
+    console.log(budget.value);
+    
+    <!---var selected = d3.select("#dropdown").node().value;-->
+    
+            
+    jQuery.ajax({
+         url: "/PlotIsoCost",
+         data: {"starting_station": selected, "max_budget": budget.value},
+         type: 'POST',
+         success: function(data){
+         markersLayer.clearLayers();
+         L.geoJSON( jQuery.parseJSON(data.data), {
+    pointToLayer: function (feature, latlng) {
+        return L.circleMarker(latlng, geojsonMarkerOptions)
+    }
+, style: function(feature){
+return {fillColor: feature.properties.marker_colour}},
+
+    onEachFeature: onEachFeature
+}).addTo(markersLayer);
+         
+        markersLayer.addTo(map);
+         }
+     })
+     
+    });
+</script>
+</body>
+
+</html>
