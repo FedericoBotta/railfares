@@ -18,6 +18,9 @@ import geopandas as gpd
 import math
 from urllib.request import urlopen
 import numpy as np
+import branca.colormap as cm
+import folium
+from folium.plugins import MarkerCluster
 import json
 
 project_dir = '/Users/fb394/Documents/GitHub/railfares/'
@@ -138,7 +141,60 @@ inflation_df = pd.DataFrame(change_list)
 
 inflation_df.to_csv(project_dir + 'mean_price_change.csv')
 
+inflation_gdf = stations.merge(inflation_df, left_on = 'CRS Code', right_on = '0')
 
+
+max_price = 4.0
+step = 0.25
+bins = list(np.arange(-2.5, max_price + step, step))
+n_bins = (max_price + 2.5) / step
+
+
+labels = []
+colour_step = 240/n_bins
+
+r = 240
+g = 240
+b= 240
+
+for i in range(0, int(n_bins), 1):
+    
+    labels.append(rgb2hex([r/255, (g)/255, (b)/255]))
+    g = g - colour_step
+    b = b - colour_step
+
+colormap = cm.LinearColormap(colors= labels, vmin = 0, vmax = max_price,
+                              caption='Price (£)')
+
+inflation_gdf['marker_colour'] = pd.cut(inflation_gdf['1'], bins = bins,
+                                    labels =labels, include_lowest = True)
+
+
+cost_map = folium.Map(location = [inflation_gdf.dissolve().centroid[0].coords[0][1],inflation_gdf.dissolve().centroid[0].coords[0][0]], 
+                      tiles = "https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZmVkZWJvdHRhIiwiYSI6ImNsNnZzZmx1bDA0aXozYnA5NHNxc2oxYm4ifQ.NH-kHQqlCLP3OVnx5ygJlQ",
+                      attr='mapbox', zoom_start = 7)
+
+cost_map.add_child(colormap)
+
+marker_cluster = MarkerCluster(name = "Train stations").add_to(cost_map)
+
+inflation_gdf = inflation_gdf.to_crs(epsg = 4326)
+
+for idx, row in inflation_gdf.iterrows():
+    
+    
+    folium.CircleMarker([row["geometry"].y, row['geometry'].x],
+                  icon=folium.Icon(color = '#000000', icon_color=row['marker_colour']),
+                  fill = True, fill_color = row['marker_colour'], color = '#000000', fill_opacity = 0.75, radius = 8, weight = 1,
+                  popup="Station: " + "Change: " + str(round(row['1'],2))).add_to(cost_map)
+
+
+
+
+
+
+
+cost_map.save(project_dir + 'inflation_mean.html')
 
 
 
