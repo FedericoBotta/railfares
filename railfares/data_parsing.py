@@ -50,11 +50,7 @@ def get_station_clusters(project_dir):
     
     stream = pkg_resources.resource_filename(__package__, 'RJFAF214/RJFAF214.FSC')
     
-<<<<<<< HEAD
     with open(stream, "r", newline = '') as f:
-=======
-    with open(project_dir + 'RJFAF648/RJFAF648.FSC', newline = '') as f:
->>>>>>> 36c7df253053c4abe533ecba887567001b0e299d
         reader = csv.reader(f)
         for row in reader:
             if "Records" in row[0]:
@@ -62,26 +58,14 @@ def get_station_clusters(project_dir):
                 break
             
     
-<<<<<<< HEAD
-    # with open(project_dir + 'RJFAF495/RJFAF495.FSC', newline = '') as f:
-    #     reader = csv.reader(f)
-    #     for row in reader:
-    
-    #         if "Records" in row[0]:
-    #             number_rows = int(re.findall(r'\d+', row[0])[0])
-    #             break
-    
-    # station_clusters = pd.read_csv(project_dir + 'RJFAF214/RJFAF214.FSC', skiprows = 6, nrows = number_rows, names = ['col'])
     station_clusters = pd.read_csv(stream, skiprows = 6, nrows = number_rows, names = ['col'])
-=======
-    station_clusters = pd.read_csv(project_dir + 'RJFAF648/RJFAF648.FSC', skiprows = 6, nrows = number_rows, names = ['col'])
->>>>>>> 36c7df253053c4abe533ecba887567001b0e299d
     
     return pd.DataFrame({'update-marker': station_clusters['col'].str[0],
                    'cluster_id': station_clusters['col'].str[1:5],
                    'cluster_nlc': station_clusters['col'].str[5:9],
                    'end_date': station_clusters['col'].str[9:17],
                    'start_date': station_clusters['col'].str[17:25]})
+
 
 def get_cluster_from_nlc(nlc_code, project_dir, end_date = '31122999'):
     '''
