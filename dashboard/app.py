@@ -306,7 +306,7 @@ def plot_ctrse():
 if __name__ == '__main__':
     
     project_dir = '/Users/fb394/Documents/GitHub/railfares/'
-    od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix.csv', low_memory = False)
+    od_list = pd.read_csv(project_dir + 'od_season.csv', low_memory = False)
     naptan_gdf = data_parsing.get_naptan_data(project_dir)
     naptan_gdf = naptan_gdf.to_crs(epsg = 4326)
     station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
