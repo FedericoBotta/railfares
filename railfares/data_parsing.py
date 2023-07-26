@@ -58,7 +58,6 @@ def get_station_clusters(project_dir):
                 break
             
     
-
     station_clusters = pd.read_csv(stream, skiprows = 6, nrows = number_rows, names = ['col'])
     
     return pd.DataFrame({'update-marker': station_clusters['col'].str[0],
@@ -66,6 +65,7 @@ def get_station_clusters(project_dir):
                    'cluster_nlc': station_clusters['col'].str[5:9],
                    'end_date': station_clusters['col'].str[9:17],
                    'start_date': station_clusters['col'].str[17:25]})
+
 
 def get_cluster_from_nlc(nlc_code, project_dir, end_date = '31122999'):
     '''
