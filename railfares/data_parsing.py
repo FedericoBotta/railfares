@@ -7,6 +7,7 @@ import string
 import folium
 import json
 from warnings import warn
+import pkg_resources
 
 
 #DEPRECATED
@@ -47,16 +48,26 @@ def get_station_clusters(project_dir):
 
     '''
     
+    stream = pkg_resources.resource_filename(__package__, 'RJFAF214/RJFAF214.FSC')
     
-    with open(project_dir + 'RJFAF495/RJFAF495.FSC', newline = '') as f:
+    with open(stream, "r", newline = '') as f:
         reader = csv.reader(f)
         for row in reader:
-    
             if "Records" in row[0]:
                 number_rows = int(re.findall(r'\d+', row[0])[0])
                 break
+            
     
-    station_clusters = pd.read_csv(project_dir + 'RJFAF495/RJFAF495.FSC', skiprows = 6, nrows = number_rows, names = ['col'])
+    # with open(project_dir + 'RJFAF495/RJFAF495.FSC', newline = '') as f:
+    #     reader = csv.reader(f)
+    #     for row in reader:
+    
+    #         if "Records" in row[0]:
+    #             number_rows = int(re.findall(r'\d+', row[0])[0])
+    #             break
+    
+    # station_clusters = pd.read_csv(project_dir + 'RJFAF214/RJFAF214.FSC', skiprows = 6, nrows = number_rows, names = ['col'])
+    station_clusters = pd.read_csv(stream, skiprows = 6, nrows = number_rows, names = ['col'])
     
     return pd.DataFrame({'update-marker': station_clusters['col'].str[0],
                    'cluster_id': station_clusters['col'].str[1:5],

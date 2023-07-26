@@ -41,7 +41,7 @@ stations.to_crs(epsg = 4326, inplace = True)
 
 od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix.csv', low_memory = False)
 
-updated_od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix_updated.csv', low_memory = False)
+updated_od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix_april_2023_data.csv', low_memory = False)
 
 
 old = od_list[['origin_crs', 'fare']].groupby(['origin_crs']).mean().reset_index().rename(columns = {'fare':'old_fare'})
@@ -194,7 +194,7 @@ for idx, row in inflation_gdf.iterrows():
 
 
 
-cost_map.save(project_dir + 'inflation_mean.html')
+cost_map.save(project_dir + 'inflation_mean_2022_2023.html')
 
 
 
