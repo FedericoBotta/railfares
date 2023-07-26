@@ -24,6 +24,7 @@ def get_lsoa_boundaries():
         
         temp_id = id_list[0:250]
         
+
         temp_url = 'https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/LSOA_Dec_2021_Boundaries_Full_Clipped_EW_BFC_2022/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json&objectIds=' + ','.join(str(x) for x in temp_id)
         
         temp_gdf = gpd.read_file(temp_url)
