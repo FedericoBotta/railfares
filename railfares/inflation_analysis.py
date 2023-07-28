@@ -144,10 +144,10 @@ inflation_df.to_csv(project_dir + 'mean_price_change.csv')
 inflation_gdf = stations.merge(inflation_df, left_on = 'CRS Code', right_on = '0')
 
 
-max_price = 4.0
+max_price = 8.0
 step = 0.25
-bins = list(np.arange(-2.5, max_price + step, step))
-n_bins = (max_price + 2.5) / step
+bins = list(np.arange(-3.5, max_price + step, step))
+n_bins = (max_price + 3.5) / step
 
 
 labels = []
@@ -169,7 +169,7 @@ colormap = cm.LinearColormap(colors= labels, vmin = 0, vmax = max_price,
 inflation_gdf['marker_colour'] = pd.cut(inflation_gdf['1'], bins = bins,
                                     labels =labels, include_lowest = True)
 
-
+        
 cost_map = folium.Map(location = [inflation_gdf.dissolve().centroid[0].coords[0][1],inflation_gdf.dissolve().centroid[0].coords[0][0]], 
                       tiles = "https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZmVkZWJvdHRhIiwiYSI6ImNsNnZzZmx1bDA0aXozYnA5NHNxc2oxYm4ifQ.NH-kHQqlCLP3OVnx5ygJlQ",
                       attr='mapbox', zoom_start = 7)

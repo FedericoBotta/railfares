@@ -48,7 +48,20 @@ def get_station_clusters(project_dir):
 
     '''
     
-    stream = pkg_resources.resource_filename(__package__, 'RJFAF214/RJFAF214.FSC')
+    data_files = pkg_resources.resource_listdir(__package__, project_dir)
+    
+    filename = [temp for temp in data_files if temp.endswith('.FSC')]
+    
+    if len(filename) > 1:
+        
+        raise ValueError("Multiple files with the specified extension found.")
+    
+    if len(filename) == 0:
+        
+        raise ValueError("No files with the specified extension found.")
+
+    
+    stream = pkg_resources.resource_filename(__package__, filename)
     
     with open(stream, "r", newline = '') as f:
         reader = csv.reader(f)
@@ -294,7 +307,23 @@ def get_location_records(location_type, project_dir):
 
     '''
     
-    with open(project_dir + 'RJFAF495/RJFAF495.LOC', newline = '') as f:
+    data_files = pkg_resources.resource_listdir(__package__, project_dir)
+    
+    filename = [temp for temp in data_files if temp.endswith('.LOC')]
+    
+    if len(filename) > 1:
+        
+        raise ValueError("Multiple files with the specified extension found.")
+    
+    if len(filename) == 0:
+        
+        raise ValueError("No files with the specified extension found.")
+
+    
+    stream = pkg_resources.resource_filename(__package__, filename)
+    
+    with open(stream, "r", newline = '') as f:
+
         reader = csv.reader(f)
         for row in reader:
     
@@ -302,7 +331,8 @@ def get_location_records(location_type, project_dir):
                 number_rows = int(re.findall(r'\d+', row[0])[0])
                 break
     
-    location_df = pd.read_csv(project_dir + 'RJFAF495/RJFAF495.LOC', skiprows = 6, nrows = number_rows, names = ['col'])
+    
+    location_df = pd.read_csv(stream, skiprows = 6, nrows = number_rows, names = ['col'])
     
     if location_type == 'location record':
         
@@ -623,7 +653,22 @@ def get_flow_records(flow_type, project_dir):
 
     '''
     
-    with open(project_dir + 'RJFAF495/RJFAF495.FFL', newline = '') as f:
+    data_files = pkg_resources.resource_listdir(__package__, project_dir)
+    
+    filename = [temp for temp in data_files if temp.endswith('.FFL')]
+    
+    if len(filename) > 1:
+        
+        raise ValueError("Multiple files with the specified extension found.")
+    
+    if len(filename) == 0:
+        
+        raise ValueError("No files with the specified extension found.")
+
+    
+    stream = pkg_resources.resource_filename(__package__, filename)
+    
+    with open(stream, "r", newline = '') as f:
         reader = csv.reader(f)
         for row in reader:
     
@@ -631,7 +676,7 @@ def get_flow_records(flow_type, project_dir):
                 number_rows = int(re.findall(r'\d+', row[0])[0])
                 break
     
-    flow_df = pd.read_csv(project_dir + 'RJFAF495/RJFAF495.FFL', skiprows = 6, nrows = number_rows, names = ['col'])
+    flow_df = pd.read_csv(stream, skiprows = 6, nrows = number_rows, names = ['col'])
     
     if flow_type == 'flow':
         
@@ -708,7 +753,23 @@ def get_ticket_type_records(project_dir):
 
     '''
     
-    with open(project_dir + 'RJFAF495/RJFAF495.TTY', newline = '') as f:
+    data_files = pkg_resources.resource_listdir(__package__, project_dir)
+    
+    filename = [temp for temp in data_files if temp.endswith('.TTY')]
+    
+    if len(filename) > 1:
+        
+        raise ValueError("Multiple files with the specified extension found.")
+    
+    if len(filename) == 0:
+        
+        raise ValueError("No files with the specified extension found.")
+
+    
+    stream = pkg_resources.resource_filename(__package__, filename)
+    
+    
+    with open(stream, "r", newline = '') as f:
         reader = csv.reader(f)
         for row in reader:
     
@@ -716,7 +777,7 @@ def get_ticket_type_records(project_dir):
                 number_rows = int(re.findall(r'\d+', row[0])[0])
                 break
     
-    ticket_df = pd.read_csv(project_dir + 'RJFAF495/RJFAF495.TTY', skiprows = 6, nrows = number_rows, names = ['col'])
+    ticket_df = pd.read_csv(stream, skiprows = 6, nrows = number_rows, names = ['col'])
     
     return pd.DataFrame({'update_marker': ticket_df['col'].str[0],
                          'ticket_code': ticket_df['col'].str[1:4],
@@ -767,7 +828,23 @@ def get_ticket_validity(project_dir):
 
     '''
     
-    with open(project_dir + 'RJFAF495/RJFAF495.TVL', newline = '') as f:
+    data_files = pkg_resources.resource_listdir(__package__, project_dir)
+    
+    filename = [temp for temp in data_files if temp.endswith('.TVL')]
+    
+    if len(filename) > 1:
+        
+        raise ValueError("Multiple files with the specified extension found.")
+    
+    if len(filename) == 0:
+        
+        raise ValueError("No files with the specified extension found.")
+
+    
+    stream = pkg_resources.resource_filename(__package__, filename)
+    
+    
+    with open(stream, "r", newline = '') as f:
         reader = csv.reader(f)
         for row in reader:
     
@@ -775,7 +852,7 @@ def get_ticket_validity(project_dir):
                 number_rows = int(re.findall(r'\d+', row[0])[0])
                 break
     
-    validity_df = pd.read_csv(project_dir + 'RJFAF495/RJFAF495.TVL', skiprows = 6, nrows = number_rows, names = ['col'])
+    validity_df = pd.read_csv(stream, skiprows = 6, nrows = number_rows, names = ['col'])
     
     return pd.DataFrame({'validity_code': validity_df['col'].str[0:2],
                          'end_date': validity_df['col'].str[2:10],
@@ -813,8 +890,10 @@ def get_station_location(project_dir, tiploc = False):
 
     '''
     
+    stream = pkg_resources.resource_filename(__package__, 'ttis418/ttisf418.msn')
     
-    timetable = pd.read_csv(project_dir + 'ttis418/ttisf418.msn', skiprows = 1, names = ['col'])
+    
+    timetable = pd.read_csv(stream, skiprows = 1, names = ['col'])
     
 
     station_locations = timetable[timetable['col'].apply(lambda x: (len(x) == 82) and (x[0] == 'A'))]
@@ -854,7 +933,9 @@ def get_naptan_data(project_dir):
 
     '''
     
-    naptan_data = pd.read_csv(project_dir + 'naptan_data.csv', low_memory = False)[['ATCOCode', 'CommonName', 'Easting', 'Northing', 'Longitude', 'Latitude', 'StopType']]
+    stream = pkg_resources.resource_filename(__package__, 'naptan_data.csv')
+    
+    naptan_data = pd.read_csv(stream, low_memory = False)[['ATCOCode', 'CommonName', 'Easting', 'Northing', 'Longitude', 'Latitude', 'StopType']]
     
     naptan_rail = naptan_data[naptan_data['StopType'] == 'RLY'].copy()
     
