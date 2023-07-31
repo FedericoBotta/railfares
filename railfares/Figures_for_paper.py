@@ -10,7 +10,7 @@ from matplotlib.cm import ScalarMappable
 
 
 
-project_dir = '/Users/fb394/Documents/GitHub/railfares/'
+data_dir = '/Users/fb394/Documents/GitHub/railfares/railfares'
 
 naptan_gdf = data_parsing.get_naptan_data(project_dir)
 naptan_gdf = naptan_gdf.to_crs(epsg = 4326)

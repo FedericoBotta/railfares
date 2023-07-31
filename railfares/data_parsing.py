@@ -62,7 +62,7 @@ def get_station_clusters(data_dir = '/Data/RJFAF214'):
         raise ValueError("No files with the specified extension found.")
 
     
-    stream = pkg_resources.resource_filename(__package__, filename)
+    stream = pkg_resources.resource_filename(__package__, data_dir + filename[0])
     
     with open(stream, "r", newline = '') as f:
         reader = csv.reader(f)
@@ -328,7 +328,7 @@ def get_location_records(location_type, data_dir = '/Data/RJFAF214'):
         raise ValueError("No files with the specified extension found.")
 
     
-    stream = pkg_resources.resource_filename(__package__, filename)
+    stream = pkg_resources.resource_filename(__package__, data_dir + filename[0])
     
     with open(stream, "r", newline = '') as f:
 
@@ -681,7 +681,7 @@ def get_flow_records(flow_type, data_dir = '/Data/RJFAF214'):
         raise ValueError("No files with the specified extension found.")
 
     
-    stream = pkg_resources.resource_filename(__package__, filename)
+    stream = pkg_resources.resource_filename(__package__, data_dir + filename[0])
     
     with open(stream, "r", newline = '') as f:
         reader = csv.reader(f)
@@ -782,7 +782,7 @@ def get_ticket_type_records(data_dir = '/Data/RJFAF214'):
         raise ValueError("No files with the specified extension found.")
 
     
-    stream = pkg_resources.resource_filename(__package__, filename)
+    stream = pkg_resources.resource_filename(__package__, data_dir + filename[0])
     
     
     with open(stream, "r", newline = '') as f:
@@ -858,7 +858,7 @@ def get_ticket_validity(data_dir = '/Data/RJFAF214'):
         raise ValueError("No files with the specified extension found.")
 
     
-    stream = pkg_resources.resource_filename(__package__, filename)
+    stream = pkg_resources.resource_filename(__package__, data_dir + filename[0])
     
     
     with open(stream, "r", newline = '') as f:
@@ -921,7 +921,7 @@ def get_station_location(data_dir = '/Data/ttis418/', tiploc = False):
         raise ValueError("No files with the specified extension found.")
 
     
-    stream = pkg_resources.resource_filename(__package__, filename)
+    stream = pkg_resources.resource_filename(__package__, data_dir + filename[0])
     
     timetable = pd.read_csv(stream, skiprows = 1, names = ['col'])
     
@@ -945,7 +945,7 @@ def get_station_location(data_dir = '/Data/ttis418/', tiploc = False):
     
     return gpd.GeoDataFrame(station_df, geometry = station_points)
 
-def get_naptan_data(data_dir):
+def get_naptan_data(data_dir = '/Data/'):
     '''
     Parse the NAPTAN data containing the location of all stations. This is an
     alternative to using the location data contained in the ATOC timetable files.
@@ -969,6 +969,7 @@ def get_naptan_data(data_dir):
     
     filename = [temp for temp in data_files if 'naptan' in temp]
     
+    
     if len(filename) > 1:
         
         raise ValueError("Multiple files with the specified extension found.")
@@ -978,7 +979,7 @@ def get_naptan_data(data_dir):
         raise ValueError("No files with the specified extension found.")
 
     
-    stream = pkg_resources.resource_filename(__package__, filename)
+    stream = pkg_resources.resource_filename(__package__, data_dir + filename[0])
     
     naptan_data = pd.read_csv(stream, low_memory = False)[['ATCOCode', 'CommonName', 'Easting', 'Northing', 'Longitude', 'Latitude', 'StopType']]
     
