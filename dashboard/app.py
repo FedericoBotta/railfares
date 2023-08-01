@@ -5,17 +5,12 @@ import railfares.functionalities as functionalities
 import pandas as pd
 import geopandas as gpd
 
-import math
-from urllib.request import urlopen
-import numpy as np
-import json
-
 
 app=Flask(__name__)
 @app.route('/', methods = ['GET', 'POST'])
 def root():
     
-   station_gdf = data_parsing.get_station_location(project_dir)
+   station_gdf = data_parsing.get_station_location()
     
    list_stations = station_gdf['Station name'].unique().tolist()
    # list_stations.reverse()
@@ -25,7 +20,7 @@ def root():
 @app.route('/isocost/', methods = ['GET', 'POST'])
 def isocost():
     
-    station_gdf = data_parsing.get_station_location(project_dir)
+    station_gdf = data_parsing.get_station_location()
      
     list_stations = station_gdf['Station name'].unique().tolist()
     
@@ -106,7 +101,7 @@ def plot_iso_cost():
     
     # starting_station_crs = data_parsing.get_station_code_from_name(starting_station, project_dir)['CRS Code']
     
-    isocost = data_parsing.get_isocost_stations(starting_station, budget, project_dir)
+    isocost = data_parsing.get_isocost_stations(starting_station, budget)
     
     max_price = budget
     step = 2
@@ -306,19 +301,25 @@ def plot_ctrse():
 if __name__ == '__main__':
     
     project_dir = '/Users/fb394/Documents/GitHub/railfares/'
-    od_list = pd.read_csv(project_dir + 'od_season.csv', low_memory = False)
-    naptan_gdf = data_parsing.get_naptan_data(project_dir)
+    print('loading od list')
+    od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix.csv', low_memory = False)
+    print("loaded od list")
+    naptan_gdf = data_parsing.get_naptan_data()
     naptan_gdf = naptan_gdf.to_crs(epsg = 4326)
-    station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
+    print('loaded naptan data')
+    station_gdf = data_parsing.get_station_location(tiploc = True)
     station_gdf = station_gdf.to_crs(epsg = 4326)
+    print('loading boundary data')
     # gb_boundary = gpd.read_file('http://geoportal1-ons.opendata.arcgis.com/datasets/f2c2211ff185418484566b2b7a5e1300_0.zip?outSR={%22latestWkid%22:27700,%22wkid%22:27700}')
     gb_boundary = gpd.read_file('https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Countries_Dec_2021_GB_BFC_2022/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json')
     gb_boundary = gb_boundary.to_crs(epsg = 4326)
-
+    print('finisehd loading boundary and getting lsoa data')
     lsoa_gdf = functionalities.get_lsoa_boundaries()
-    
+    print('finished loading lsoa data and now merging geodataframes')
     stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
+    print('finished merging geodataframes now converting')
     stations.to_crs(epsg = 4326, inplace = True)
+    print('finished converting, app ready to start')
     
     app.run(host="localhost", port = 8080, debug=True)
 

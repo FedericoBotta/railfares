@@ -10,11 +10,11 @@ from matplotlib.cm import ScalarMappable
 
 
 
-data_dir = '/Users/fb394/Documents/GitHub/railfares/railfares'
+project_dir = '/Users/fb394/Documents/GitHub/railfares/'
 
-naptan_gdf = data_parsing.get_naptan_data(project_dir)
+naptan_gdf = data_parsing.get_naptan_data()
 naptan_gdf = naptan_gdf.to_crs(epsg = 4326)
-station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
+station_gdf = data_parsing.get_station_location(tiploc = True)
 station_gdf = station_gdf.to_crs(epsg = 4326)
 # gb_boundary = gpd.read_file('http://geoportal1-ons.opendata.arcgis.com/datasets/f2c2211ff185418484566b2b7a5e1300_0.zip?outSR={%22latestWkid%22:27700,%22wkid%22:27700}')
 gb_boundary = gpd.read_file('https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Countries_Dec_2021_GB_BFC_2022/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json')
@@ -58,9 +58,9 @@ station_od = od_list[od_list['Origin station name'] == starting_station].copy()
 
 station_od['Destination station name'] = station_od['Destination station name'].str.rstrip()
 
-naptan_gdf = data_parsing.get_naptan_data(project_dir)
+naptan_gdf = data_parsing.get_naptan_data()
 naptan_gdf = naptan_gdf.to_crs(epsg = 4326)
-station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
+station_gdf = data_parsing.get_station_location(tiploc = True)
 station_gdf = station_gdf.to_crs(epsg = 4326)
 stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'}))
 
