@@ -1,11 +1,12 @@
+### This script calculates the number of medium employment centres (as defined
+### by DfT Journey Time Statistics data) that can be reached with different
+### budgets, as set in the list budget.
+
 import pandas as pd
 import geopandas as gpd
 import railfares.data_parsing as data_parsing
-import folium
-from folium.plugins import MarkerCluster
-from matplotlib.colors import rgb2hex
-import branca.colormap as cm
 
+budget = [10,25,50,75,100,125,150,175,200]
 
 data = pd.read_excel('https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1039129/journey-time-statistics-2019-destination-datasets.ods',
                      engine = 'odf', sheet_name = 'Medium_employment_centres', skiprows = 1, header = 1)
@@ -15,12 +16,10 @@ points = gpd.points_from_xy(data['Easting'], data['Northing'], crs = 'OSGB36 / B
 employment_centres_gdf = gpd.GeoDataFrame(data, geometry = points)
 employment_centres_gdf.to_crs(epsg = 27700, inplace = True)
 
-project_dir = '/Users/fb394/Documents/GitHub/railfares/'
-
-naptan_gdf = data_parsing.get_naptan_data(project_dir)
+naptan_gdf = data_parsing.get_naptan_data()
 naptan_gdf = naptan_gdf.to_crs(epsg = 27700)
 
-station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
+station_gdf = data_parsing.get_station_location(tiploc = True)
 station_gdf = station_gdf.to_crs(epsg = 4326)
 stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'}))
 
@@ -34,13 +33,12 @@ closest_station_to_employment_centre_gdf = gpd.sjoin_nearest(employment_centres_
 closest_station_to_employment_centre_gdf.rename(columns = {'CommonName': 'EmploymentCentreStationName', 'CRS Code': 'EmploymentCentreStationCRS'}, inplace = True)
 
 
-od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix.csv', low_memory = False)
+od_list = pd.read_csv('od_minimum_cost_matrix.csv', low_memory = False)
 
 subset_od_list = od_list[od_list['destination_crs'].isin(closest_station_to_employment_centre_gdf['EmploymentCentreStationCRS'])].reset_index(drop = True)
 
 employment_centre_fares = pd.DataFrame()
 
-budget = [200]
 
 for b in budget:
 
@@ -78,5 +76,5 @@ for b in budget:
             
             reachable_employment_centres.at[idx, 'Count'] = reachable_employment_centres.at[idx, 'Count'] + 1
 
-    reachable_employment_centres.to_csv(project_dir + 'number_medium_employment_centres_' + str(b) + '_pounds.csv')
+    reachable_employment_centres.to_csv('number_medium_employment_centres_' + str(b) + '_pounds.csv')
 

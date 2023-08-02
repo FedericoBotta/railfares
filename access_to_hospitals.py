@@ -6,7 +6,6 @@ from folium.plugins import MarkerCluster
 from matplotlib.colors import rgb2hex
 import branca.colormap as cm
 
-# data = pd.read_csv('http://filestore.nationalarchives.gov.uk/datasets/records/hospital-records.txt', sep='\t', encoding = 'ISO-8859-1')
 data = pd.read_excel('https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1039129/journey-time-statistics-2019-destination-datasets.ods',
                      engine = 'odf', sheet_name = 'Hospitals', skiprows = 1, header = 1)
 
@@ -15,29 +14,13 @@ points = gpd.points_from_xy(data['Easting'], data['Northing'], crs = 'OSGB36 / B
 hospitals_gdf = gpd.GeoDataFrame(data, geometry = points)
 hospitals_gdf.to_crs(epsg = 27700, inplace = True)
 
-#hospitals_buffer_gdf = hospitals_gdf.copy()
-# hospitals_buffer_gdf['geometry'] = hospitals_buffer_gdf.geometry.buffer(5000)
 
-project_dir = '/Users/fb394/Documents/GitHub/railfares/'
-
-naptan_gdf = data_parsing.get_naptan_data(project_dir)
+naptan_gdf = data_parsing.get_naptan_data()
 naptan_gdf = naptan_gdf.to_crs(epsg = 27700)
 
-station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
+station_gdf = data_parsing.get_station_location(tiploc = True)
 station_gdf = station_gdf.to_crs(epsg = 4326)
 stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'}))
-
-
-# stations_within_buffer = stations.sjoin(hospitals_buffer_gdf, how = 'left')
-
-# msoa_boundaries = gpd.read_file(project_dir + 'Middle_Layer_Super_Output_Areas_(December_2011)_Boundaries_Full_Clipped_(BFC)_EW_V3/Middle_Layer_Super_Output_Areas_(December_2011)_Boundaries_Full_Clipped_(BFC)_EW_V3.shp')
-
-# msoa_station_gdf = stations.sjoin(msoa_boundaries, how = 'left').drop('index_right', axis = 1)
-
-# msoa_hospitals_gdf = hospitals_buffer_gdf.sjoin(msoa_boundaries, how = 'left')
-
-# msoa_stations_hospitals = msoa_station_gdf.merge(msoa_hospitals_gdf, on = 'MSOA11CD')
-
 
 gb_boundary = gpd.read_file('http://geoportal1-ons.opendata.arcgis.com/datasets/f2c2211ff185418484566b2b7a5e1300_0.zip?outSR={%22latestWkid%22:27700,%22wkid%22:27700}')
 
@@ -47,13 +30,7 @@ stations_england_gdf = stations_gb_gdf[stations_gb_gdf['ctry17nm'] == 'England']
 closest_station_to_hospital_gdf = gpd.sjoin_nearest(hospitals_gdf, stations_england_gdf, max_distance = 5000, distance_col = 'distance')[['SiteCode', 'SiteName', 'CommonName', 'TIPLOC', 'Station name', 'CRS Code', 'distance']]
 closest_station_to_hospital_gdf.rename(columns = {'CommonName': 'HospitalStationName', 'CRS Code': 'HospitalStationCRS'}, inplace = True)
 
-# stations_to_closest_hospital_gdf = gpd.sjoin_nearest(stations_england_gdf, hospitals_gdf, distance_col = 'distance')
-# stations_to_closest_hospital_gdf.rename(columns = {'CommonName': 'DepartingStation', 'CRS Code': 'DepartingCRS'}, inplace = True)
-
-# all_stations_to_hospital_gdf = stations_to_closest_hospital_gdf.merge(closest_station_to_hospital_gdf, on = 'SiteCode')
-
-
-od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix.csv', low_memory = False)
+od_list = pd.read_csv('od_minimum_cost_matrix.csv', low_memory = False)
 
 subset_od_list = od_list[od_list['destination_crs'].isin(closest_station_to_hospital_gdf['HospitalStationCRS'])].reset_index(drop = True)
 
@@ -88,20 +65,9 @@ for idx, row in hospital_fares.iterrows():
             hospital_fares.at[idx, col] = temp_hospital_df[col].iloc[0]
 
 
-hospital_fares.to_csv(project_dir + 'hospital_fares.csv')
+hospital_fares.to_csv('hospital_fares.csv')
 
 
-
-# subset_od_list = od_list[od_list['destination_crs'].isin(all_stations_to_hospital_gdf['HospitalStationCRS'].to_list())]
-
-# hospital_fares = pd.DataFrame()
-
-# for idx, row in all_stations_to_hospital_gdf.iterrows():
-    
-#     temp = subset_od_list[(subset_od_list['origin_crs'] == row['DepartingCRS']) & (subset_od_list['destination_crs'] == row['HospitalStationCRS'])].copy()
-#     temp['Hospital'] = row['SiteName_x']
-#     hospital_fares = pd.concat([hospital_fares, temp])
-#     print(idx)
 
 
 hospital_fare_gdf = stations_england_gdf.merge(hospital_fares, left_on = 'CRS Code', right_on = 'origin_crs')
@@ -136,9 +102,7 @@ hospital_fare_gdf['marker_colour'] = pd.cut(hospital_fare_gdf['fare'], bins = bi
 cost_map = folium.Map(location = [station_gdf.dissolve().centroid[0].coords[0][1],station_gdf.dissolve().centroid[0].coords[0][0]], 
                       tiles = "https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZmVkZWJvdHRhIiwiYSI6ImNsNnZzZmx1bDA0aXozYnA5NHNxc2oxYm4ifQ.NH-kHQqlCLP3OVnx5ygJlQ",
                       attr='mapbox', zoom_start = 7)
-# svg_style = '<style>svg {background-color: white;}</style>'
 
-# colormap.get_root().header.add_child(folium.Element(svg_style))
 cost_map.add_child(colormap)
 
 marker_cluster = MarkerCluster(name = "Train stations").add_to(cost_map)
@@ -156,11 +120,7 @@ for idx, row in hospital_fare_gdf.iterrows():
 
 
 
-
-
-
-# folium.LayerControl().add_to(cost_map)
-cost_map.save(project_dir + 'hospital.html')
+cost_map.save('hospital.html')
 
 
 
