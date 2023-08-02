@@ -25,18 +25,12 @@ You can get the stations reachable with the specified budget from the specified 
 
 ```import railfares.data_parsing as data_parsing
 
-project_dir = ''
-
 starting_station = 'newcastle'
 
 budget = 10
 
-df = data_parsing.get_isocost_stations(starting_station, budget, project_dir)
+df = data_parsing.get_isocost_stations(starting_station, budget)
 ```
-
-project_dir``` must contain the path to the data (the data is currently not stored on the repo).
-
-You can also try the interactive flask dashboard by running ```poetry run python dashboard/app.py``` (this will run the dashboard in debug mode) or ```flask run``` from the dashboard folder. As above, you need to set the path to where the data is stored in the ```app.py``` file variable ```project_dir```.
 
 # Useful links
 
@@ -64,14 +58,9 @@ from folium.plugins import MarkerCluster
 from matplotlib.colors import rgb2hex
 import folium
 ```
-We then need to set the project directory, which is where the data files are stored:
-
-```bash
-project_dir = 'USE_PROJECT_DIRECTORY_PATH'
-```
 
 As a first example, we will calculate the list of stations you can reach with a given budget from a starting station.
-In the following, we refer to this as an isocost (in analogy with isochrones). Note, however, that this is not strictly speaking going to be an list of stations all reachable with the same budget (as the name isocost would imply), but rather all stations reachable with the given maximum budget.
+In the following, we refer to this as an isocost (in analogy with isochrones). Note, however, that this is not strictly speaking going to be a list of stations all reachable with the same budget (as the name isocost would imply), but rather all stations reachable with the given maximum budget.
 This means that most stations will actually be reachable with a lower budget.
 
 We start by specifying the name of a starting station, for instance Exeter St Davids:
@@ -87,7 +76,7 @@ budget = 10
 Again, as noted above, this is a maximum fare, not the exact fare.
 Next, we calculate the isocost:
 ```bash
-isocost = data_parsing.get_isocost_stations(starting_station, budget, project_dir)
+isocost = data_parsing.get_isocost_stations(starting_station, budget)
 ```
 
 After running this, the ```isocost``` variable contains a Pandas dataframe with all the
@@ -104,10 +93,10 @@ outputs to file an interactive html map:
 file_path_name = 'USE_PATH_AND_FILE_NAME_TO_OUTPUT'
 
 #then create and output the map
-data_parsing.plot_isocost_stations(starting_station, isocost, file_path_name, project_dir)
+data_parsing.plot_isocost_stations(starting_station, isocost, file_path_name)
 ````
 
-Which should look something  like this:
+Which should look something  like this (note that, however, this map was created using MapBox tiles, for which you need an API token; the tutorial uses tiles from Stamen):
 
 <img src = "Figures/exeter_10_pounds_isocost.png"/>
 
@@ -118,7 +107,7 @@ any station from the starting station. NOTE: this section requires to have the O
 First, read the OD file. This is a large file so will take some time to read
 and use a significant amount of memory:
 ```bash
-od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix.csv', low_memory = False)
+od_list = pd.read_csv('od_minimum_cost_matrix.csv', low_memory = False)
 ```
 
 Next, select the entries corresponding to journeys starting at the starting station
@@ -163,10 +152,10 @@ station_od['marker_colour'] = pd.cut(station_od['fare'], bins = bins,
 station_od['Destination station name'] = station_od['Destination station name'].str.rstrip()
 station_od['popupText'] = ['Starting station: ' + starting_station + ',<br> Destination station: ' + row['Destination station name'].lower() + ',<br> Fare: £' + str(row['fare']).ljust(4,'0') for idx, row in station_od.iterrows()]
 
-naptan_gdf = data_parsing.get_naptan_data(project_dir)
+naptan_gdf = data_parsing.get_naptan_data()
 naptan_gdf = naptan_gdf.to_crs(epsg = 4326)
 
-station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
+station_gdf = data_parsing.get_station_location(tiploc = True)
 station_gdf = station_gdf.to_crs(epsg = 4326)
 
 stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'}))
