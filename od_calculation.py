@@ -1,62 +1,8 @@
 import railfares.data_parsing as data_parsing
 import pandas as pd
 import json
-import numpy as np
 
-project_dir = '/Users/fb394/Documents/GitHub/railfares/'
-
-
-# start = time.process_time()
-# # test = data_parsing.get_isocost_stations(starting_station, b, project_dir)
-# destination_stations = data_parsing.get_isocost_from_list(station_flows_df, station_singles, project_dir)
-# # flow_record['col'].str.extract('(?P<test>.)(.)(.{4})(.{4})(.{5})(.{3})(.)(.)(.{8})(.{8})(.{3})(.)(.)(.)(.{7})')
-# print(time.process_time()-start)
-
-
-
-
-
-
-
-
-
-# station_gdf = data_parsing.get_station_location(project_dir)
-
-# loc_records_df = data_parsing.get_location_records('location record', project_dir)[['nlc_code', 'crs_code']]
-
-# stations_nlc_dict = {}
-
-# for idx, row in station_gdf.iterrows():
-    
-#     stations_codes = data_parsing.get_cluster_from_nlc(row['nlc_code'], project_dir)['cluster_id'].to_list()
-#     stations_codes.append(row['nlc_code'])
-#     stations_nlc_dict[row['Station name']] = stations_codes
-#     print(idx)
-
-
-
-
-# data_parsing.get_all_station_nlc_codes(project_dir, print_progress = True, outpath = project_dir + 'all_station_nlc_codes')
-
-
-# the following lines are old codes, replaced by the function called at line 42
-
-# dest = loc_records_df[loc_records_df['nlc_code'].isin(flow_df['destination_code'].to_list())]['nlc_code'].unique()
-# orig = loc_records_df[loc_records_df['nlc_code'].isin(flow_df['origin_code'].to_list())]['nlc_code'].unique()
-# joint = list(orig) + list(set(dest) - set(orig))
-# all_stations_nlcs = loc_records_df[(loc_records_df['nlc_code'].isin(joint)) & (loc_records_df['end_date'] == '31122999')].reset_index()
-
-# stations_nlc_dict = {}
-
-# for idx, row in all_stations_nlcs.iterrows():
-    
-#     stations_codes = data_parsing.get_cluster_from_nlc(row['nlc_code'], project_dir)['cluster_id'].to_list()
-#     stations_codes.append(row['nlc_code'])
-#     stations_nlc_dict[row['description'].rstrip()] = stations_codes
-#     print(idx)
-
-
-
+project_dir = ''
 
 
 with open(project_dir + 'all_station_nlc_codes.json', 'r') as fp:
@@ -65,22 +11,21 @@ with open(project_dir + 'all_station_nlc_codes.json', 'r') as fp:
 with open(project_dir + 'station_crs_dict.json', 'r') as fp:
     stations_crs_dict = json.load(fp)
 
-flow_df, fares_df = data_parsing.get_flow_records('both', project_dir)
-tickets = data_parsing.get_ticket_type_records(project_dir)
-validity = data_parsing.get_ticket_validity(project_dir)
-# val_code = validity[validity['out_days'] == '01']['validity_code'].to_list()
+flow_df, fares_df = data_parsing.get_flow_records('both')
+tickets = data_parsing.get_ticket_type_records()
+validity = data_parsing.get_ticket_validity()
 val_code = validity['validity_code'].to_list()
 single_tickets = pd.DataFrame([x for idx, x in tickets.iterrows() if x['end_date'] == '31122999' and x['tkt_class'] == '2' and x['tkt_type'] == 'S' and x['validity_code'] in val_code and 'anytime' in x['description'].lower()])
-loc_records_df = data_parsing.get_location_records('location record', project_dir)[['description', 'nlc_code', 'end_date']]
-station_gdf = data_parsing.get_station_location(project_dir)
+loc_records_df = data_parsing.get_location_records('location record')[['description', 'nlc_code', 'end_date']]
+station_gdf = data_parsing.get_station_location()
 
 
-clusters_dict = data_parsing.get_cluster_nlc_dict(project_dir)
+clusters_dict = data_parsing.get_cluster_nlc_dict()
 
-station_group_dict = data_parsing.fares_group_to_uic_dict(project_dir)
-group_to_station_dict = data_parsing.get_station_group_dictionary(project_dir)
-uic_to_names = data_parsing.uic_to_station_name_dict(project_dir)
-group_name_to_station_name_dict = data_parsing.station_group_to_stations_names_dict(project_dir)
+station_group_dict = data_parsing.fares_group_to_uic_dict()
+group_to_station_dict = data_parsing.get_station_group_dictionary()
+uic_to_names = data_parsing.uic_to_station_name_dict()
+group_name_to_station_name_dict = data_parsing.station_group_to_stations_names_dict()
 
 od_list = pd.DataFrame()
 progr = 0
@@ -133,7 +78,6 @@ for key, value in stations_nlc_dict.items():
     # merge back with fares data to get destination stations names and fares
     isocost_fare = isocost_route.merge(station_singles[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left').drop_duplicates().copy()
     
-    # destination_stations = isocost_destinations.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
     destination_stations = station_nlc.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc').copy()
     
     group_codes_indices = destination_stations.index[destination_stations['nlc_code'].isin(station_group_dict.keys())]
@@ -141,7 +85,6 @@ for key, value in stations_nlc_dict.items():
     
     destination_stations = destination_stations.astype({'description': object})
     
-    # destination_stations.loc[group_codes_indices, 'description'] = np.array([group_name_to_station_name_dict[x['description'].rstrip()] for idx,x in group_codes_values.iterrows()], dtype = object)
     if not group_codes_indices.empty:
         
         destination_stations['description'] = destination_stations.apply(lambda x: group_name_to_station_name_dict[x['description'].rstrip()] if x.name in group_codes_indices else x['description'], axis = 1)
@@ -178,8 +121,6 @@ for key, value in stations_nlc_dict.items():
         station_code = [station_code]
     
     station_nlc = loc_records_df[(loc_records_df['nlc_code'].isin(station_code)) & (loc_records_df['end_date'] == '31122999')].drop_duplicates().drop('end_date', axis = 1).copy()
-    # currently not needed, so commented out
-    # isocost_destinations = station_gdf.merge(station_nlc, left_on = 'CRS Code', right_on = 'crs_code', how = 'inner')
     
     isocost_fare = isocost_route.merge(inverse_station_singles[['flow_id','fare']], left_on = 'flow_id', right_on = 'flow_id', how = 'left').drop_duplicates().copy()
     
@@ -187,7 +128,6 @@ for key, value in stations_nlc_dict.items():
     
     
     
-    # inverse_destination_stations = isocost_destinations.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc')
     inverse_destination_stations = station_nlc.merge(isocost_fare, left_on = 'nlc_code', right_on = 'cluster_nlc').copy()
     
     
@@ -197,7 +137,6 @@ for key, value in stations_nlc_dict.items():
     
     inverse_destination_stations = inverse_destination_stations.astype({'description': object})
     
-    # inverse_destination_stations.loc[group_codes_indices, 'description'] = np.array([group_name_to_station_name_dict[x['description'].rstrip()] for idx,x in group_codes_values.iterrows()], dtype = object)
     if not group_codes_indices.empty:
         
         inverse_destination_stations['description'] = inverse_destination_stations.apply(lambda x: group_name_to_station_name_dict[x['description'].rstrip()] if x.name in group_codes_indices else x['description'], axis = 1)
@@ -210,27 +149,18 @@ for key, value in stations_nlc_dict.items():
     inverse_destination_stations.rename(columns = {'temp origin_code': 'destination_code', 'temp destination_code': 'origin_code'}, inplace = True)
     
     if not destination_stations.empty and not inverse_destination_stations.empty:
-        
-        # od_df = pd.concat([destination_stations, inverse_destination_stations], ignore_index = True)[['Station name', 'geometry', 'nlc_code', 'origin_code','destination_code', 
-        #                                                                                              'route_code', 'end_date', 'start_date', 'toc',
-        #                                                                                              'flow_id', 'cluster_id', 'fare']]
+
         od_df = pd.concat([destination_stations, inverse_destination_stations], ignore_index = True)[['description', 'nlc_code', 'origin_code','destination_code', 
                                                                                                      'route_code', 'end_date', 'start_date', 'toc',
                                                                                                      'flow_id', 'cluster_id', 'fare']].copy()
     elif inverse_destination_stations.empty:
         
-        # od_df = destination_stations[['Station name', 'geometry', 'nlc_code', 'origin_code','destination_code', 
-        #                                                                                              'route_code', 'end_date', 'start_date', 'toc',
-        #                                                                                              'flow_id', 'cluster_id', 'fare']]
         od_df = destination_stations[['description', 'nlc_code', 'origin_code','destination_code', 
                                                                                                      'route_code', 'end_date', 'start_date', 'toc',
                                                                                                      'flow_id', 'cluster_id', 'fare']].copy()
     
     elif destination_stations.empty:
         
-        # od_df = inverse_destination_stations[['Station name', 'geometry', 'nlc_code', 'origin_code','destination_code', 
-        #                                                                                              'route_code', 'end_date', 'start_date', 'toc',
-        #                                                                                              'flow_id', 'cluster_id', 'fare']]
         od_df = inverse_destination_stations[['description', 'nlc_code', 'origin_code','destination_code', 
                                                                                                      'route_code', 'end_date', 'start_date', 'toc',
                                                                                                      'flow_id', 'cluster_id', 'fare']].copy()
@@ -263,7 +193,7 @@ for key, value in stations_nlc_dict.items():
     print('Station: ' ,key, ', index ', progr)
     progr = progr + 1
 
-# od_list_min = od_list.loc[od_list.groupby(['Destination station name', 'Origin station name'])['fare'].idxmin()]
+
 od_list.to_csv(project_dir + 'od_minimum_cost_matrix_april_2023_data.csv')
 
 

@@ -6,11 +6,9 @@ from matplotlib.colors import rgb2hex
 import geopandas as gpd
 import branca.colormap as cm
 
-project_dir = '/Users/fb394/Documents/GitHub/railfares/'
-
 starting_station = 'NEWCASTLE'
 
-od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix.csv')
+od_list = pd.read_csv('od_minimum_cost_matrix.csv')
 
 station_od = od_list[od_list['Origin station name'] == starting_station].copy()
 
@@ -42,9 +40,9 @@ station_od['marker_colour'] = pd.cut(station_od['fare'], bins = bins,
 
 station_od['Destination station name'] = station_od['Destination station name'].str.rstrip()
 
-naptan_gdf = data_parsing.get_naptan_data(project_dir)
+naptan_gdf = data_parsing.get_naptan_data()
 naptan_gdf = naptan_gdf.to_crs(epsg = 4326)
-station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
+station_gdf = data_parsing.get_station_location(tiploc = True)
 station_gdf = station_gdf.to_crs(epsg = 4326)
 stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'}))
 
@@ -83,7 +81,7 @@ for idx, row in od_list_min.iterrows():
 
 
 # folium.LayerControl().add_to(cost_map)
-cost_map.save(project_dir + 'newcastle_map.html')
+cost_map.save('newcastle_map.html')
 
 
 
