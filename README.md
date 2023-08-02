@@ -190,7 +190,7 @@ cost_map.save(file_path_name)
 
 ```
 
-The resulting map should look something like this:
+The resulting map should look something like this (as for the above map, this was generated using tiles from MapBox):
 
 <img src = "Figures/exeter_cost_map.png"/>
 
