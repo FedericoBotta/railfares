@@ -1,5 +1,5 @@
 from .data_parsing import *
-from .functionalities import *
+# from .functionalities import *
 
 import sys
 
