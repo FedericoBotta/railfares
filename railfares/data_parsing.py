@@ -1265,7 +1265,7 @@ def get_isocost_stations(starting_station, budget, fares_data_dir = '/Data/RJFAF
     return pd.concat([destination_stations, inverse_destination_stations])
     
 
-def plot_isocost_stations(starting_station_code, destination_stations, out_path, data_dir = '/Data/ttis418/'):
+def plot_isocost_stations(starting_station_code, destination_stations, out_path, data_dir = '/Data/ttis418/', tiles = 'StamenToner', mapbox_token = None):
     '''
     Create an html map of the isocost from a station.
 
@@ -1280,6 +1280,12 @@ def plot_isocost_stations(starting_station_code, destination_stations, out_path,
     data_dir : STRING, optional
         The directory where the data is hosted, needed for reading data files.
         The default is for the data released with the package.
+    tiles: STRING, optional
+        The tiles to use for the background map. The defualt is for Stamen Toner (tiles = "StamenToner")
+        tiles. If using mapbox tiles (tiles = "Mapbox"), the mapbox token needs to be supllied.
+    mapbox_token: STRING, optional
+        The token for using mapbox tiles. Only needed if the tiles parameter
+        is set to "Mapbox". Default is None.
 
     Returns
     -------
@@ -1305,8 +1311,14 @@ def plot_isocost_stations(starting_station_code, destination_stations, out_path,
 
     duplicate_stations = []
     
+    if tiles == 'StamenToner':
+        
+        cost_map = folium.Map(location = [stats_gdf.dissolve().centroid[0].coords[0][1],stats_gdf.dissolve().centroid[0].coords[0][0]], tiles = "Stamen Toner", zoom_start = 10)
     
-    cost_map = folium.Map(location = [stats_gdf.dissolve().centroid[0].coords[0][1],stats_gdf.dissolve().centroid[0].coords[0][0]], tiles = "https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZmVkZWJvdHRhIiwiYSI6ImNsNnZzZmx1bDA0aXozYnA5NHNxc2oxYm4ifQ.NH-kHQqlCLP3OVnx5ygJlQ", attr = 'mapbox', zoom_start = 10)
+    elif tiles == 'Mapbox':
+        
+        cost_map = folium.Map(location = [stats_gdf.dissolve().centroid[0].coords[0][1],stats_gdf.dissolve().centroid[0].coords[0][0]], tiles = "https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=" + mapbox_token, attr = 'mapbox', zoom_start = 10)
+        
     for idx, row in stats_gdf.iterrows():
         
         if row['Station name'] not in duplicate_stations:
