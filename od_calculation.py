@@ -1,3 +1,6 @@
+### This script calculates an origin-destination (OD) style matrix for the cost
+### of travelling between pairs of train stations in Great Britain.
+
 import railfares.data_parsing as data_parsing
 import pandas as pd
 import json
@@ -194,6 +197,6 @@ for key, value in stations_nlc_dict.items():
     progr = progr + 1
 
 
-od_list.to_csv(project_dir + 'od_minimum_cost_matrix_april_2023_data.csv')
+od_list.to_csv(project_dir + 'od_minimum_cost_matrix.csv')
 
 
