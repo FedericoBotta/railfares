@@ -1,6 +1,6 @@
 from .data_parsing import *
 from .download_data import *
-# from .functionalities import *
+from .functionalities import *
 
 import sys
 

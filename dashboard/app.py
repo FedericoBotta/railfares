@@ -13,7 +13,6 @@ def root():
    station_gdf = data_parsing.get_station_location()
     
    list_stations = station_gdf['Station name'].unique().tolist()
-   # list_stations.reverse()
    
    return render_template('index.html', list_stations = list_stations)
 
@@ -69,8 +68,6 @@ def plot_cost():
     
     starting_station = request.form['starting_station']
 
-    # od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix.csv', low_memory = False)
-
     station_od = od_list[od_list['Origin station name'] == starting_station].copy()
 
     max_price = 300
@@ -99,8 +96,6 @@ def plot_iso_cost():
     starting_station = request.form['starting_station']
     budget = int(request.form['max_budget'])
     
-    # starting_station_crs = data_parsing.get_station_code_from_name(starting_station, project_dir)['CRS Code']
-    
     isocost = data_parsing.get_isocost_stations(starting_station, budget)
     
     max_price = budget
@@ -128,8 +123,6 @@ def plot_iso_cost():
 def plot_stats_metrics():
     
     metric = request.form['metric_to_plot']
-    
-    # stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
     
     la_file = gpd.read_file(project_dir + 'Local_Authority_Districts_(May_2021)_UK_BFE/LAD_MAY_2021_UK_BFE_V2.shp')
     la_file = la_file.to_crs(epsg = 4326)
@@ -164,7 +157,6 @@ def plot_stats_metrics():
     if metric == 'Number' or metric == 'Metric' :
         
         step = 1
-        # step = round(max_distance/100)
     
     elif metric == 'Population Metric':
         
@@ -173,7 +165,6 @@ def plot_stats_metrics():
     else:
         
         step = 5
-        # step = round(max_distance/100)
 
     bins, labels = functionalities.create_colours(max_distance, step)
         
@@ -208,9 +199,6 @@ def plot_stats_metrics():
 def plot_hospital_metrics():
     
     metric = request.form['metric_to_plot']
-    
-    # stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
-    # stations.to_crs(epsg = 4326, inplace = True)
     
     stations_gb_gdf = stations.sjoin(gb_boundary)
     stations_england_gdf = stations_gb_gdf[stations_gb_gdf['CTRY21NM'] == 'England'].copy().drop('index_right', axis = 1).dropna(axis = 0, subset = ['CRS Code'])
@@ -300,26 +288,24 @@ def plot_ctrse():
 
 if __name__ == '__main__':
     
-    project_dir = '/Users/fb394/Documents/GitHub/railfares/'
-    print('loading od list')
+    project_dir = ''
+
     od_list = pd.read_csv(project_dir + 'od_minimum_cost_matrix.csv', low_memory = False)
-    print("loaded od list")
+
     naptan_gdf = data_parsing.get_naptan_data()
     naptan_gdf = naptan_gdf.to_crs(epsg = 4326)
-    print('loaded naptan data')
+
     station_gdf = data_parsing.get_station_location(tiploc = True)
     station_gdf = station_gdf.to_crs(epsg = 4326)
-    print('loading boundary data')
-    # gb_boundary = gpd.read_file('http://geoportal1-ons.opendata.arcgis.com/datasets/f2c2211ff185418484566b2b7a5e1300_0.zip?outSR={%22latestWkid%22:27700,%22wkid%22:27700}')
+
     gb_boundary = gpd.read_file('https://services1.arcgis.com/ESMARspQHYMw9BZ9/arcgis/rest/services/Countries_Dec_2021_GB_BFC_2022/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json')
     gb_boundary = gb_boundary.to_crs(epsg = 4326)
-    print('finisehd loading boundary and getting lsoa data')
+
     lsoa_gdf = functionalities.get_lsoa_boundaries()
-    print('finished loading lsoa data and now merging geodataframes')
+
     stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
-    print('finished merging geodataframes now converting')
+
     stations.to_crs(epsg = 4326, inplace = True)
-    print('finished converting, app ready to start')
     
     app.run(host="localhost", port = 8080, debug=True)
 
