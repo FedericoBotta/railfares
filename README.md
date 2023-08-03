@@ -18,7 +18,7 @@ To open a Python session with all the dependencies you can run the following:
 poetry shell
 poetry run python
 # From the Python shell, load the package to test it's installed:
-import railfares.data_parsing as data_parsing
+import railfares
 ```
 
 You can get the stations reachable with the specified budget from the specified starting station by running the following code:
