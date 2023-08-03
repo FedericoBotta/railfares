@@ -34,10 +34,11 @@
 <button class = "main-button" type="button" onclick="location.href= {{ url_for('station_metrics') }}">Station accessibility</button>
 <button class = "main-button" type="button" onclick="location.href= {{ url_for('hospital_metrics') }}">Hospital accessibility</button>
 <button class = "main-button" type="button" onclick="location.href= {{ url_for('employment_metrics') }}" disabled>Employment accessibility</button>
-<button class = "main-button" type="button" onclick="location.href= {{ url_for('cost_exclusion_index') }}">Cost accessibility index</button>
+<!--<button class = "main-button" type="button" onclick="location.href= {{ url_for('cost_exclusion_index') }}">Cost accessibility index</button>-->
 <hr class = "main-sep-line">
 
 <p style = "font-size: 24px" "font-family: MyriadPro"> Here, you can see some basic metrics of how many employment centres you can travel to starting from different stations with a given, fixed, budget. Note that we consider an employment centre to be accessible by train if there is a station within a 5km radius circle centred on it.
+Also note that the cost assumes you are using a single any-time ticket, and fares are accurate as of February 2022.
 <br><br>
 First, select the budget (£):
 <select id="dropdown-budget" method="GET" action="/">

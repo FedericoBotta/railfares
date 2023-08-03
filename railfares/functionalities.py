@@ -6,6 +6,7 @@ import json
 import math
 from matplotlib.colors import rgb2hex
 import numpy as np
+from warnings import warn
 
 def get_lsoa_boundaries():
     
@@ -36,7 +37,7 @@ def get_lsoa_boundaries():
     return lsoa_gdf
 
 def calculate_ctrse_index(project_dir, naptan_gdf, max_dist, od_list, lsoa_gdf, budget, imd_flag):
-    
+    warn('This function should not be used currently.', DeprecationWarning, stacklevel = 2)
     station_gdf = data_parsing.get_station_location(project_dir, tiploc = True)
     station_gdf = station_gdf.to_crs(epsg = 4326)
     stations = gpd.GeoDataFrame(naptan_gdf.merge(station_gdf, left_on = 'TIPLOC', right_on = 'tiploc_code', how = 'left').drop(columns = ['geometry_y', 'Easting', 'Northing'], axis = 1).rename(columns = {'geometry_x': 'geometry'})).dropna().drop_duplicates('CRS Code')
