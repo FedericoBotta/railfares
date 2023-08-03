@@ -1,3 +1,6 @@
+### This script plots a map with the cost of travelling to each station from the
+### starting station specified at the start of this script.
+
 import railfares.data_parsing as data_parsing
 import folium
 import pandas as pd
@@ -52,15 +55,9 @@ station_od_gdf = stations.merge(station_od, left_on = 'CRS Code', right_on = 'de
 
 od_list_min = station_od_gdf.loc[station_od_gdf.groupby(['Destination station name'])['fare'].idxmin()]
 
-# cost_map = folium.Map(location = [station_gdf.dissolve().centroid[0].coords[0][1],station_gdf.dissolve().centroid[0].coords[0][0]], tiles = "Stamen Terrain", zoom_start = 5)
-
-
 cost_map = folium.Map(location = [station_gdf.dissolve().centroid[0].coords[0][1],station_gdf.dissolve().centroid[0].coords[0][0]], 
-                      tiles = "https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiZmVkZWJvdHRhIiwiYSI6ImNsNnZzZmx1bDA0aXozYnA5NHNxc2oxYm4ifQ.NH-kHQqlCLP3OVnx5ygJlQ",
-                      attr='mapbox', zoom_start = 7)
-# svg_style = '<style>svg {background-color: white;}</style>'
+                      tiles = "Stamen Toner", zoom_start = 7)
 
-# colormap.get_root().header.add_child(folium.Element(svg_style))
 cost_map.add_child(colormap)
 
 marker_cluster = MarkerCluster(name = "Train stations").add_to(cost_map)
@@ -79,8 +76,6 @@ for idx, row in od_list_min.iterrows():
 
 
 
-
-# folium.LayerControl().add_to(cost_map)
 cost_map.save('newcastle_map.html')
 
 
