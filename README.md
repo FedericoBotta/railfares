@@ -198,7 +198,7 @@ where darker shades of red correspond to a higher fare.
 
 # Output data
 
-The data realesed as part of this package can be found in the [Releases](https://github.com/FedericoBotta/railfares/releases/download/v1/Results.zip)). There are a number of files available, and here we provide a description of their structure (for more information on how the data set was generated, see paper):
+The data realesed as part of this package can be found in the [Releases](https://github.com/FedericoBotta/railfares/releases/download/v1/Results.zip). There are a number of files available, and here we provide a description of their structure (for more information on how the data set was generated, see paper):
 
 * ```od_minimum_cost_matrix.csv```: this file contains the miminum fare between pairs of stations, as described in the paper. The file has one entry per row, and the following columns:
 
