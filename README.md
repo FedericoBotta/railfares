@@ -196,3 +196,8 @@ The resulting map should look something like this (as for the above map, this wa
 
 where darker shades of red correspond to a higher fare.
 
+# Output data
+
+The data realesed as part of this package can be found in the [Releases](https://github.com/FedericoBotta/railfares/releases/download/v1/Results.zip)). There are a number of files available, and here we provide a description of their structure (for more information on how the data set was generated, see paper):
+
+* ```od_minimum_cost_matrix.csv```
