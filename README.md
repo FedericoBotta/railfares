@@ -218,4 +218,30 @@ The data realesed as part of this package can be found in the [Releases](https:/
     |Origin station name| The commone name of the starting station.|
     |origin_crs| The Computer Reservation System (CRS) code of the starting station.|
     |destination_crs| The CRS code of the destination station.|
-  
+
+* ```number_hospitals_xx_pounds.csv```: this series of files (where ```xx``` is a number) contains the number of hospitals that can be reached from any station for a budget of ```£xx```. The file has one entry per row, and the following columns:
+    | Column label      | Description |
+    | ----------- | ----------- |
+    | origin_crs| The CRS code of the origin station.|
+    | Count| The number of hospitals that can be reached from the origin station with the budget.|
+
+  Note: the files ```number_large_employment_centres_xx_pounds.csv```, ```number_medium_employment_centres_xx_pounds.csv``` and ```number_town_centres_xx_pounds.csv``` all have this structure too. See paper for a description of how they were generated.
+
+* ```stations_stats_xx_pounds.csv```: this series of files (where ```xx``` is a number) contains some statistics of how far you can travel from a given station with a given budget of ```xxx```. The file has one entry per row, and the following columns:
+      | Column label      | Description |
+    | ----------- | ----------- |
+    | Station CRS| The CRS code of the starting station|
+    | Number| The number of stations you can travel to from the starting station with the budget.|
+    | Max distance| The maximum distance to a station, in metres, you can travel to from the starting station with the budget.|
+    | Mean distance| The mean distance, in metres, you can travel to from the starting station with the budget.|
+    | Median distance| The median distance, in metres, you can travel to from the starting station with the budget.|
+
+* ```stations_pairwise_distances.csv```: this file contains the distance, in metres, between each pair of stations. The file has one entry per row, and the following columns:
+      | Column label      | Description |
+    | ----------- | ----------- |
+    | First CRS| The CRS code of the first station in the pair.|
+    | Second CRS| The CRS code of the second station in the pair.|
+    | Distance| The distance between the two stations.|
+
+* ```stations_stats_and_pop_xx_pounds.csv```: this series of files (where ```xx``` is a  number) is experimental and should be ignored for now.
+* ```mean_price_change.csv```: this file is experimental and should be ignored for now.
