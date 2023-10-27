@@ -206,4 +206,16 @@ The data realesed as part of this package can be found in the [Releases](https:/
     | ----------- | ----------- |
     | Destination station name| The common name of the destination station.|
     | nlc_code| The National Location Code (NLC) for the destination station. NLC are codes associated to each train station.|
-    | origin_code      | |
+    | origin_code| This is the code representing the flow origin. It can either be a station NLC or a cluster NLC. |
+    | destination_code| This is the code representing the flow destination. It can either be a station NLC or a cluster NLC. |
+    | route_code| The route code. |
+    | end_date| The date until which this flow fare is valid.|
+    | start_date| The date from which this flow fare is valid.|
+    | toc| The fare code of the Train Operating Company (TOC) setting the fare. |
+    | flow_id| The unique identifier of this flow. |
+    | cluster_id| The cluster NLC of the starting station.|
+    |fare| The fare of this flow, in GBP (£).|
+    |Origin station name| The commone name of the starting station.|
+    |origin_crs| The Computer Reservation System (CRS) code of the starting station.|
+    |destination_crs| The CRS code of the destination station.|
+  
