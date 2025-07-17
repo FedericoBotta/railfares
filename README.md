@@ -23,7 +23,8 @@ import railfares
 
 You can get the stations reachable with the specified budget from the specified starting station by running the following code:
 
-```import railfares.data_parsing as data_parsing
+```
+import railfares.data_parsing as data_parsing
 
 starting_station = 'newcastle'
 
